@@ -31,9 +31,9 @@ export default function PlantingCalendarApp() {
 
   useEffect(() => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
+      navigator.geolocation.getCurrentPosition(async (position) => {
         const { latitude, longitude } = position.coords;
-        // Simulación de ubicación inversa para ejemplo
+        // Para simplificar, usamos ciudad fija, podés mejorar con reverse geocoding
         const ciudad = "Buenos Aires";
         setLocation(ciudad);
         setAutoLocated(true);
@@ -43,10 +43,30 @@ export default function PlantingCalendarApp() {
   }, []);
 
   const fetchWeather = async (city) => {
-    // Simulación de clima actual
-    const clima = "Soleado, 20°C";
-    setWeather(clima);
-  };
+  try {
+    const apiKey = "b4b3582ab5dabfc13d1e93f160ab1d3a";
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=es&appid=${apiKey}`
+    );
+
+    if (!response.ok) {
+      setWeather("No se pudo obtener el clima");
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.weather && data.weather.length > 0 && data.main) {
+      const clima = `${data.weather[0].description}, ${data.main.temp.toFixed(1)}°C`;
+      setWeather(clima);
+    } else {
+      setWeather("No se pudo obtener el clima");
+    }
+  } catch (error) {
+    setWeather("Error al obtener el clima");
+    console.error(error);
+  }
+};
 
   const handleSearch = () => {
     const cityData = plantingData[location];
