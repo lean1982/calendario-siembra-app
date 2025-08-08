@@ -1,146 +1,118 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 
-const plantingData = {
-  "Buenos Aires": {
-    agosto: [
-      {
-        name: "Frutilla",
-        cosecha: "Noviembre",
-        riego: "Mantener humedad constante, regar día por medio si no llueve"
-      },
-      {
-        name: "Brócoli",
-        cosecha: "Octubre",
-        riego: "Riego regular, 2-3 veces por semana"
-      },
-      {
-        name: "Repollo",
-        cosecha: "Octubre",
-        riego: "Riego abundante semanal, según clima"
-      }
-    ]
-  }
-};
+const cultivos = [
+  {
+    nombre: "Frutilla",
+    siembra: ["Agosto", "Septiembre"],
+    cosecha: "Noviembre",
+    riego: "Mantener humedad constante, regar día por medio si no llueve",
+    emoji: "🍓",
+  },
+  {
+    nombre: "Brócoli",
+    siembra: ["Marzo", "Abril", "Agosto"],
+    cosecha: "Octubre",
+    riego: "Riego regular, 2-3 veces por semana",
+    emoji: "🥦",
+  },
+  {
+    nombre: "Repollo",
+    siembra: ["Febrero", "Marzo", "Agosto"],
+    cosecha: "Octubre",
+    riego: "Riego abundante semanal, según clima",
+    emoji: "🥬",
+  },
+];
 
-export default function PlantingCalendarApp() {
-  const [location, setLocation] = useState("");
-  const [month, setMonth] = useState("");
-  const [results, setResults] = useState([]);
-  const [weather, setWeather] = useState(null);
-  const [autoLocated, setAutoLocated] = useState(false);
+function App() {
+  const [mes, setMes] = useState("");
+  const [busqueda, setBusqueda] = useState("");
+  const [clima, setClima] = useState(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        const { latitude, longitude } = position.coords;
-        // Para simplificar, usamos ciudad fija, podés mejorar con reverse geocoding
-        const ciudad = "Buenos Aires";
-        setLocation(ciudad);
-        setAutoLocated(true);
-        fetchWeather(ciudad);
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        try {
+          const res = await axios.get(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=52ac69e0b6188d936e25a27eb1f7f99d&lang=es`
+          );
+          setClima(res.data);
+        } catch (error) {
+          console.error("Error al obtener el clima:", error);
+        }
       });
     }
   }, []);
 
-  const fetchWeather = async (city) => {
-  try {
-    const apiKey = "b4b3582ab5dabfc13d1e93f160ab1d3a";
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=es&appid=${apiKey}`
-    );
+  const cultivosFiltrados = cultivos.filter((cultivo) => {
+    const coincideMes =
+      mes === "" || cultivo.siembra.includes(capitalizar(mes));
+    const coincideNombre =
+      cultivo.nombre.toLowerCase().includes(busqueda.toLowerCase());
+    return coincideMes && coincideNombre;
+  });
 
-    if (!response.ok) {
-      setWeather("No se pudo obtener el clima");
-      return;
-    }
-
-    const data = await response.json();
-
-    if (data.weather && data.weather.length > 0 && data.main) {
-      const clima = `${data.weather[0].description}, ${data.main.temp.toFixed(1)}°C`;
-      setWeather(clima);
-    } else {
-      setWeather("No se pudo obtener el clima");
-    }
-  } catch (error) {
-    setWeather("Error al obtener el clima");
-    console.error(error);
+  function capitalizar(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
-};
-
-  const handleSearch = () => {
-    const cityData = plantingData[location];
-    if (cityData && cityData[month]) {
-      setResults(cityData[month]);
-    } else {
-      setResults([]);
-    }
-    fetchWeather(location);
-  };
 
   return (
-    <div className="max-w-xl mx-auto p-6 space-y-4">
-      <h1 className="text-2xl font-bold text-center">Calendario de Siembra y Cosecha</h1>
+    <div className="max-w-3xl mx-auto p-4">
+      <h1 className="text-3xl font-bold text-center text-green-700 my-6">
+  Calendario de Siembra y Cosecha
+    </h1>
+      <p className="text-center mb-4">
+        Consultá qué sembrar y cuándo cosechar según tu ubicación y época del año.
+      </p>
 
-      {!autoLocated && (
-        <div className="space-y-2">
-          <label htmlFor="location" className="block font-medium">Ubicación</label>
-          <input
-            id="location"
-            type="text"
-            className="w-full border rounded px-3 py-2"
-            placeholder="Ciudad o provincia"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-        </div>
-      )}
-
-      <div className="space-y-2">
-        <label htmlFor="month" className="block font-medium">Mes</label>
+      <div className="flex gap-2 mb-4">
         <input
-          id="month"
           type="text"
-          className="w-full border rounded px-3 py-2"
-          placeholder="Ej: agosto"
-          value={month}
-          onChange={(e) => setMonth(e.target.value.toLowerCase())}
+          placeholder="Mes"
+          value={mes}
+          onChange={(e) => setMes(e.target.value)}
+          className="border px-2 py-1 rounded w-1/2"
         />
-
-        <button
-          onClick={handleSearch}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Buscar
-        </button>
+        <input
+          type="text"
+          placeholder="Buscar"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          className="border px-2 py-1 rounded w-1/2"
+        />
       </div>
 
-      {weather && (
-        <div className="border p-4 rounded-lg shadow">
-          <div className="p-4">
-            <p><strong>Clima actual en {location}:</strong> {weather}</p>
-          </div>
-        </div>
+      {clima && (
+        <p className="text-center mb-4">
+          Clima actual en <strong>{clima.name}</strong>:{" "}
+          {clima.weather[0].description}, {clima.main.temp}°C
+        </p>
       )}
 
-      {results.length > 0 ? (
-        <div className="border p-4 rounded-lg shadow">
-          <div className="p-4 space-y-2">
-            <h2 className="text-lg font-semibold">Podés sembrar:</h2>
-            <ul className="space-y-2">
-              {results.map((item, index) => (
-                <li key={index}>
-                  <strong>{item.name}</strong><br />
-                  🌱 Cosecha estimada: {item.cosecha}<br />
-                  💧 Riego: {item.riego}
-                </li>
-              ))}
-            </ul>
-          </div>
+      <h2 className="text-xl font-semibold mb-2">Podés sembrar:</h2>
+      {cultivosFiltrados.map((cultivo) => (
+        <div
+          key={cultivo.nombre}
+          className="border rounded p-3 mb-2 shadow hover:shadow-md transition"
+        >
+          <h3 className="text-lg font-bold">
+            {cultivo.emoji} {cultivo.nombre}
+          </h3>
+          <p>
+            🌱 <strong>Siembra:</strong> {cultivo.siembra.join(", ")}
+          </p>
+          <p>
+            🌾 <strong>Cosecha estimada:</strong> {cultivo.cosecha}
+          </p>
+          <p>
+            💧 <strong>Riego:</strong> {cultivo.riego}
+          </p>
         </div>
-      ) : (
-        <p className="text-center text-gray-500">No hay datos disponibles para esa combinación.</p>
-      )}
+      ))}
     </div>
   );
 }
+
+export default App;
