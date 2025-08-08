@@ -43,7 +43,7 @@ export function IconRepollo({ className = "w-16 h-16" }) {
 export const iconsByName = {
   frutilla: IconFrutilla,
   fresa: IconFrutilla,
-  brócoli: IconBrocoli,
+  "brócoli": IconBrocoli,
   brocoli: IconBrocoli,
   repollo: IconRepollo,
 };
