@@ -1,5 +1,5 @@
-// App.jsx - Responsive UI con Tailwind (según la maqueta)
-import { useEffect, useMemo, useState } from "react";
+// src/App.jsx
+import { useEffect, useMemo, useState, useCallback } from "react";
 import axios from "axios";
 
 const cultivos = [
@@ -49,38 +49,28 @@ function getIcon(main) {
   if (m.includes("cloud")) return CloudIcon;
   return SunIcon;
 }
-function capitalizar(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : ""; }
+function capitalizar(str) {
+  return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+}
 
 export default function App() {
   const [mes, setMes] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [ciudad, setCiudad] = useState("");
+
   const [clima, setClima] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorClima, setErrorClima] = useState("");
+  const [geoError, setGeoError] = useState("");   // ← error de geolocalización
+  const [pidiendoGeo, setPidiendoGeo] = useState(false);
 
   const apiKey = import.meta.env.VITE_OPENWEATHER_KEY;
 
-  // 1) Clima por geolocalización al cargar
-  useEffect(() => {
-    if (!apiKey) return;
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        await fetchClima({ lat: latitude, lon: longitude });
-      });
+  const fetchClima = useCallback(async ({ lat, lon, q }) => {
+    if (!apiKey) {
+      setErrorClima("Falta la clave de OpenWeather. Revisá la variable VITE_OPENWEATHER_KEY.");
+      return;
     }
-  }, [apiKey]);
-
-  // 2) Buscar por ciudad manual
-  async function buscarPorCiudad(e) {
-    e?.preventDefault?.();
-    if (!ciudad.trim()) return;
-    await fetchClima({ q: ciudad.trim() });
-  }
-
-  async function fetchClima({ lat, lon, q }) {
-    if (!apiKey) return;
     try {
       setLoading(true);
       setErrorClima("");
@@ -95,6 +85,41 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  }, [apiKey]);
+
+  const pedirUbicacion = useCallback(() => {
+    if (!("geolocation" in navigator)) {
+      setGeoError("Tu navegador no soporta geolocalización.");
+      return;
+    }
+    setPidiendoGeo(true);
+    setGeoError("");
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        await fetchClima({ lat: latitude, lon: longitude });
+        setPidiendoGeo(false);
+      },
+      (err) => {
+        // Mensajes claros según el error
+        if (err.code === 1) setGeoError("Permiso de ubicación denegado. Activá el permiso del navegador.");
+        else if (err.code === 2) setGeoError("No se pudo obtener tu ubicación (señal/servicio). Probá de nuevo.");
+        else setGeoError("Error al obtener la ubicación. Probá de nuevo.");
+        setPidiendoGeo(false);
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+    );
+  }, [fetchClima]);
+
+  // Intento automático al cargar (si el usuario acepta, perfecto; si no, mostramos el mensaje)
+  useEffect(() => {
+    pedirUbicacion();
+  }, [pedirUbicacion]);
+
+  async function buscarPorCiudad(e) {
+    e?.preventDefault?.();
+    if (!ciudad.trim()) return;
+    await fetchClima({ q: ciudad.trim() });
   }
 
   const cultivosFiltrados = useMemo(() => {
@@ -112,6 +137,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <div className="mx-auto w-full max-w-screen-md px-5 py-8 md:py-12">
+        {/* Header */}
         <header className="mb-6">
           <h1 className="text-3xl md:text-4xl font-bold text-green-500 leading-tight">
             Calendario de siembra y cosecha
@@ -121,6 +147,7 @@ export default function App() {
           </p>
         </header>
 
+        {/* Filtros + búsqueda */}
         <form onSubmit={buscarPorCiudad} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="flex flex-col gap-2">
             <label className="text-sm text-gray-700">Mes</label>
@@ -138,7 +165,7 @@ export default function App() {
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="Ciudad (opcional)"
+                placeholder="Ciudad (si no querés usar GPS)"
                 value={ciudad}
                 onChange={(e) => setCiudad(e.target.value)}
                 className="w-full rounded-2xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-400"
@@ -151,17 +178,33 @@ export default function App() {
                 Buscar
               </button>
             </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={pedirUbicacion}
+                className="mt-2 rounded-2xl border border-gray-300 px-4 py-2 hover:shadow transition"
+                disabled={pidiendoGeo}
+              >
+                {pidiendoGeo ? "Obteniendo ubicación..." : "Usar mi ubicación"}
+              </button>
+              {geoError && <span className="text-sm text-amber-600">{geoError}</span>}
+            </div>
           </div>
         </form>
 
+        {/* Tarjeta de clima */}
         <section className="mb-8">
           <div className="rounded-2xl border border-gray-300 p-5 md:p-6 shadow-sm">
             <div className="flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex flex-col items-center md:items-start">
-                <h3 className="text-lg font-semibold text-gray-800">{clima?.name || "—"}</h3>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {clima?.name || (loading ? "Cargando..." : "—")}
+                </h3>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-green-500 text-5xl md:text-6xl leading-none">{temp ?? "—"}°</span>
-                  <span className="text-gray-600">{capitalizar(descripcion)}</span>
+                  <span className="text-green-500 text-5xl md:text-6xl leading-none">
+                    {loading ? "…" : (temp ?? "—")}°
+                  </span>
+                  <span className="text-gray-600">{capitalizar(descripcion) || (!loading && "—")}</span>
                 </div>
               </div>
               <div className="text-green-500">
@@ -169,6 +212,7 @@ export default function App() {
               </div>
             </div>
 
+            {/* Mini “pronóstico” visual (placeholder) */}
             <div className="mt-5 grid grid-cols-7 gap-2 text-green-500">
               {diasCortos.map((d, i) => (
                 <div key={i} className="flex flex-col items-center justify-center gap-1 rounded-xl border border-gray-200 py-2">
@@ -178,11 +222,11 @@ export default function App() {
               ))}
             </div>
 
-            {loading && <p className="mt-3 text-sm text-gray-500">Cargando clima…</p>}
             {errorClima && <p className="mt-3 text-sm text-red-600">{errorClima}</p>}
           </div>
         </section>
 
+        {/* Lista de cultivos */}
         <section>
           <h2 className="text-xl md:text-2xl font-semibold mb-3">Podés sembrar:</h2>
           <div className="flex flex-col gap-5">
@@ -193,9 +237,15 @@ export default function App() {
                 </div>
                 <div className="pt-1">
                   <h3 className="text-2xl text-green-500 font-semibold">{cultivo.nombre}</h3>
-                  <p className="text-gray-500"><span className="text-gray-700 font-medium">Siembra:</span> {cultivo.siembra.join(", ")}</p>
-                  <p className="text-gray-500"><span className="text-gray-700 font-medium">Cosecha estimada:</span> {cultivo.cosecha}</p>
-                  <p className="text-gray-500"><span className="text-gray-700 font-medium">Riego:</span> {cultivo.riego}</p>
+                  <p className="text-gray-500">
+                    <span className="text-gray-700 font-medium">Siembra:</span> {cultivo.siembra.join(", ")}
+                  </p>
+                  <p className="text-gray-500">
+                    <span className="text-gray-700 font-medium">Cosecha estimada:</span> {cultivo.cosecha}
+                  </p>
+                  <p className="text-gray-500">
+                    <span className="text-gray-700 font-medium">Riego:</span> {cultivo.riego}
+                  </p>
                 </div>
               </article>
             ))}
