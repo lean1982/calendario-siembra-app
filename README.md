@@ -1,12 +1,36 @@
-# React + Vite
+# Calendario de Siembra (React + Vite + Tailwind)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Cómo usar (PASO A PASO)
 
-Currently, two official plugins are available:
+1) **Descargar este ZIP y descomprimirlo** en tu compu.
+2) Abrí una terminal dentro de la carpeta.
+3) Instalá dependencias:
+```
+npm install
+```
+4) Ejecutá en modo prueba (local):
+```
+npm run dev
+```
+Te va a mostrar una URL (por ejemplo `http://localhost:5173`). Abrila en el navegador.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Subir a GitHub
+1) Si aún no tenés un repo, crealo en GitHub.
+2) En la carpeta del proyecto, corré:
+```
+git init
+git add .
+git commit -m "Primera versión responsive"
+git branch -M main
+git remote add origin <URL-DE-TU-REPO>
+git push -u origin main
+```
+> Nota: El archivo `.env` **no se sube** (está ignorado por `.gitignore`).
 
-## Expanding the ESLint configuration
+## Vercel
+- En tu proyecto de Vercel, andá a **Settings → Environment Variables** y agregá:
+  - `VITE_OPENWEATHER_KEY` con tu clave.
+- Hacé un nuevo deploy o redeploy, y listo.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Edición rápida
+- El archivo principal de la app es `src/App.jsx`.
