@@ -1,4 +1,3 @@
-
 // src/icons.jsx
 const base = {
   fill: "none",
