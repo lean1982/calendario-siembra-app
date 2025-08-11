@@ -86,61 +86,86 @@ export default async function handler(req, res) {
       // si Trefle falla, caemos al fallback silenciosamente
     }
 
-    // 2) Fallback Wikipedia (REST) – idioma, límite y sin duplicados
-    const baseTitles = [
-      "Tomate","Papa","Cebolla","Zanahoria","Lechuga","Espinaca","Brócoli","Repollo",
-      "Frutilla","Arándano","Frambuesa","Manzana","Pera","Durazno","Calabaza",
-      "Zucchini","Pepino","Ajo","Jengibre","Ají","Maíz","Trigo","Arroz","Avena","Cebada"
-    ];
-    let titles = baseTitles;
-    if (query && query.length > 1) titles = [query, ...baseTitles];
+    // 2) Fallback Wikipedia (REST) – idioma, límite, normalización y sin duplicados
+const baseTitles = [
+  "Tomate","Papa","Cebolla","Zanahoria","Lechuga","Espinaca","Brócoli","Repollo",
+  "Frutilla","Arándano","Frambuesa","Manzana","Pera","Durazno","Calabaza",
+  "Zucchini","Pepino","Ajo","Jengibre","Ají","Maíz","Trigo","Arroz","Avena","Cebada"
+];
 
-    const uniq = Array.from(new Set(titles)).slice(0, limit);
+const titleMapEs = {
+  // Corrige ambigüedades comunes en ES:
+  "Papa": "Solanum tuberosum",              // papa / patata
+  "Patata": "Solanum tuberosum",
+  "Frutilla": "Fragaria × ananassa",        // fresa cultivada
+  "Fresa": "Fragaria × ananassa",
+  "Arándano": "Vaccinium",                   // género; mejor que la desambigua
+  "Durazno": "Prunus persica",               // melocotón/durazno
+  "Zucchini": "Cucurbita pepo",              // calabacín
+  "Ají": "Capsicum",                         // familia de chiles
+  "Brócoli": "Brassica oleracea var. italica",
+  "Repollo": "Brassica oleracea var. capitata",
+  "Zanahoria": "Daucus carota subsp. sativus",
+  "Lechuga": "Lactuca sativa",
+  "Espinaca": "Spinacia oleracea",
+  "Pepino": "Cucumis sativus",
+  "Ajo": "Allium sativum",
+};
 
-    const results = await Promise.all(
-      uniq.map(async (t) => {
-        try {
-          const url = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t)}`;
-          const r = await withTimeout(
-            (signal) =>
-              fetch(url, {
-                signal,
-                headers: {
-                  Accept: "application/json",
-                  "User-Agent": "calendario-siembra-app (vercel function)",
-                },
-              }),
-            8000,
-            `wiki:${t}`
-          );
-          if (!r.ok) return null;
-          const w = await r.json();
-          if (!w?.title || (!w?.extract && !w?.description)) return null;
-          return {
-            id: w.title,
-            attributes: {
-              name: w.title,
-              binomial_name: "",
-              description: w.extract || w.description || "",
-              main_image_url: w.originalimage?.source || w.thumbnail?.source || "",
+let titles = baseTitles;
+if (query && query.length > 1) titles = [query, ...baseTitles];
+
+// Normaliza cada título antes de ir a Wikipedia
+const norm = (t) => titleMapEs[t] || t;
+const uniq = Array.from(new Set(titles.map(norm))).slice(0, limit);
+
+const results = await Promise.all(
+  uniq.map(async (t) => {
+    try {
+      const url = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t)}`;
+      const r = await withTimeout(
+        (signal) =>
+          fetch(url, {
+            signal,
+            headers: {
+              Accept: "application/json",
+              "User-Agent": "calendario-siembra-app (vercel function)",
             },
-          };
-        } catch (e) {
-          console.error("Wikipedia item error:", t, e?.message || e);
-          return null;
-        }
-      })
-    );
+          }),
+        8000,
+        `wiki:${t}`
+      );
+      if (!r.ok) return null;
+      const w = await r.json();
 
-    const filtered = results.filter(Boolean);
-    const data = uniqBy(filtered, (x) => x.id);
+      // Filtra desambiguaciones u otras páginas no útiles
+      if (w?.type === "disambiguation") return null;
+      const desc = (w?.extract || w?.description || "").toLowerCase();
+      if (desc.includes("desambiguación")) return null;
 
-    if (debug) info.push({ source: "wikipedia", lang, limit, in: uniq.length, out: data.length });
+      if (!w?.title || (!w?.extract && !w?.description)) return null;
 
-    res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate=86400");
-    return res.status(200).json({ data, _ms: Date.now() - started, _info: debug ? info : undefined });
-  } catch (err) {
-    console.error("openfarm handler fatal:", err?.message || err);
-    return res.status(500).json({ error: "Proxy error", details: String(err?.message || err) });
-  }
-}
+      return {
+        id: w.title,
+        attributes: {
+          name: w.title,
+          binomial_name: "",
+          description: w.extract || w.description || "",
+          main_image_url: w.originalimage?.source || w.thumbnail?.source || "",
+        },
+      };
+    } catch (e) {
+      console.error("Wikipedia item error:", t, e?.message || e);
+      return null;
+    }
+  })
+);
+
+const filtered = results.filter(Boolean);
+const data = uniqBy(filtered, (x) => x.id);
+
+if (debug) info.push({ source: "wikipedia", lang, limit, in: uniq.length, out: data.length });
+
+res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate=86400");
+return res.status(200).json({ data, _ms: Date.now() - started, _info: debug ? info : undefined });
+
