@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import axios from "axios";
 import { iconsByName, IconFrutilla } from "./icons.jsx";
+import { searchCrops } from "./services/openfarm";
 
 const cultivos = [
   { nombre: "Frutilla", icon: "frutilla", siembra: ["Agosto", "Septiembre"], cosecha: "Noviembre", riego: "Mantener humedad constante, regar día por medio si no llueve" },
@@ -53,6 +54,12 @@ export default function App() {
   const [errorClima, setErrorClima] = useState("");
   const [geoError, setGeoError] = useState("");
   const [pidiendoGeo, setPidiendoGeo] = useState(false);
+
+  // OpenFarm
+  const [ofQuery, setOfQuery] = useState("");
+  const [ofLoading, setOfLoading] = useState(false);
+  const [ofResults, setOfResults] = useState([]);
+  const [ofError, setOfError] = useState("");
 
   const apiKey = import.meta.env.VITE_OPENWEATHER_KEY;
 
@@ -106,6 +113,22 @@ export default function App() {
     e?.preventDefault?.();
     if (!ciudad.trim()) return;
     await fetchClima({ q: ciudad.trim() });
+  }
+
+  // Buscar en OpenFarm (sin tocar layout existente)
+  async function handleOpenFarmSearch(e) {
+    e?.preventDefault?.();
+    if (!ofQuery.trim()) return;
+    try {
+      setOfLoading(true);
+      setOfError("");
+      const items = await searchCrops(ofQuery);
+      setOfResults(items);
+    } catch (err) {
+      setOfError(`No pudimos buscar en OpenFarm. ${err.message}`);
+    } finally {
+      setOfLoading(false);
+    }
   }
 
   const cultivosFiltrados = useMemo(() => {
@@ -217,6 +240,46 @@ export default function App() {
               <p className="mt-3 text-sm text-red-600">{errorClima}</p>
             )}
           </div>
+        </section>
+
+        {/* OpenFarm: bloque integrado al diseño aprobado */}
+        <section className="mb-8">
+          {/* Form con mismos estilos que filtros */}
+          <form onSubmit={handleOpenFarmSearch} className="grid grid-cols-1 gap-4 mb-3">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm text-gray-700">Buscar en OpenFarm</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Ej: strawberry, tomato, broccoli…"
+                  value={ofQuery}
+                  onChange={(e) => setOfQuery(e.target.value)}
+                  className="w-full rounded-2xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+                <button
+                  type="submit"
+                  className="shrink-0 rounded-2xl border border-gray-300 px-4 py-3 hover:shadow transition"
+                >
+                  Buscar
+                </button>
+              </div>
+              {ofLoading && <span className="text-sm text-gray-500">Buscando…</span>}
+              {ofError && <span className="text-sm text-red-600">{ofError}</span>}
+            </div>
+          </form>
+
+          {/* Resultados visualmente iguales a tus tarjetas */}
+          {ofResults.length > 0 && (
+            <div className="flex flex-col gap-3">
+              {ofResults.map((r) => (
+                <article key={r.id} className="border rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+                  <h3 className="text-lg font-bold text-green-500">{r.name}</h3>
+                  {r.binomial && <p className="text-sm italic text-gray-500">{r.binomial}</p>}
+                  {r.description && <p className="text-sm text-gray-700 mt-1">{r.description}</p>}
+                </article>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Lista de cultivos */}
