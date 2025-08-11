@@ -35,6 +35,7 @@ export default function App() {
       const data = await searchCrops(query);
       setItems(data);
     } catch (e) {
+      setItems([]);
       setError(e?.message || "Error de red");
     } finally {
       setLoading(false);
@@ -101,8 +102,11 @@ export default function App() {
         </div>
       </form>
 
-      {loading && <p>Buscando...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {loading && <p className="text-sm text-gray-600">Buscando…</p>}
+      {error && <p className="text-sm text-red-600">No pudimos buscar en OpenFarm. {error}</p>}
+      {!loading && !error && items.length === 0 && query && (
+        <p className="text-sm text-gray-600">Sin resultados para “{query}”. Probá con otro término (en inglés funciona mejor: strawberry, tomato, potato…).</p>
+      )}
 
       {items.map((c) => (
         <div key={c.id} className="border rounded p-3 mb-2 shadow hover:shadow-md transition">
