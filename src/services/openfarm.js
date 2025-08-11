@@ -8,7 +8,6 @@ export async function searchCrops(query) {
   return (data?.data || []).map(item => ({
     id: item.id,
     name: item.attributes?.name,
-    slug: item.attributes?.slug,
     binomial: item.attributes?.binomial_name || "",
     description: item.attributes?.description || "",
     image: item.attributes?.main_image_path || item.attributes?.main_image_url || "",

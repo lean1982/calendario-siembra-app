@@ -1,40 +1,33 @@
 // src/App.jsx
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { searchCrops } from "./services/openfarm";
-
-// UI helper
-function capitalizar(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : ""; }
 
 export default function App() {
   const [clima, setClima] = useState(null);
   const [ciudad, setCiudad] = useState("");
-  const [mes, setMes] = useState(""); // lo conservamos por diseño (a futuro lo usaremos para filtrar guías cuando sumemos esa parte)
-
-  // OpenFarm (data real)
+  const [mes, setMes] = useState("");
   const [query, setQuery] = useState("");
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [items, setItems] = useState([]);
 
-  // Cargar clima por geolocalización (como antes)
   useEffect(() => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const { latitude, longitude } = pos.coords;
-      try {
-        const res = await axios.get(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${import.meta.env.VITE_OPENWEATHER_KEY}&lang=es`
-        );
-        setClima(res.data);
-      } catch (e) {
-        // silencio: UI no se rompe si no hay clima
-      }
-    });
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        try {
+          const res = await axios.get(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${import.meta.env.VITE_OPENWEATHER_KEY}&lang=es`
+          );
+          setClima(res.data);
+        } catch {}
+      });
+    }
   }, []);
 
-  async function handleBuscarOpenFarm(e) {
-    e?.preventDefault?.();
+  async function handleBuscar(e) {
+    e.preventDefault();
     if (!query.trim()) return;
     try {
       setLoading(true);
@@ -49,14 +42,14 @@ export default function App() {
   }
 
   async function buscarPorCiudad(e) {
-    e?.preventDefault?.();
+    e.preventDefault();
     if (!ciudad.trim()) return;
     try {
       const res = await axios.get(
         `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(ciudad.trim())}&units=metric&appid=${import.meta.env.VITE_OPENWEATHER_KEY}&lang=es`
       );
       setClima(res.data);
-    } catch (e) {}
+    } catch {}
   }
 
   return (
@@ -68,7 +61,6 @@ export default function App() {
         Consultá qué sembrar y cuándo cosechar según tu ubicación y época del año.
       </p>
 
-      {/* Filtros superiores (mantenemos diseño) */}
       <div className="flex gap-2 mb-4">
         <input
           type="text"
@@ -96,24 +88,21 @@ export default function App() {
         </p>
       )}
 
-      {/* Bloque OpenFarm integrado (reemplaza la lista fija) */}
-      <form onSubmit={handleBuscarOpenFarm} className="mb-4">
-        <label className="block text-sm mb-2">Buscar cultivos (OpenFarm)</label>
+      <form onSubmit={handleBuscar} className="mb-4">
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Ej: strawberry, tomato, potato..."
+            placeholder="Buscar cultivo (OpenFarm)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="border px-2 py-1 rounded w-full"
           />
           <button className="bg-green-600 text-white px-4 py-1 rounded">Buscar</button>
         </div>
-        {loading && <p className="text-sm text-gray-500 mt-2">Buscando…</p>}
-        {error && <p className="text-sm text-red-600 mt-2">No pudimos buscar en OpenFarm. {error}</p>}
       </form>
 
-      {items.length > 0 && <h2 className="text-xl font-semibold mb-2">Resultados</h2>}
+      {loading && <p>Buscando...</p>}
+      {error && <p className="text-red-500">{error}</p>}
 
       {items.map((c) => (
         <div key={c.id} className="border rounded p-3 mb-2 shadow hover:shadow-md transition">
@@ -122,10 +111,6 @@ export default function App() {
           {c.description && <p className="text-sm text-gray-700 mt-1">{c.description}</p>}
         </div>
       ))}
-
-      {items.length === 0 && !loading && !error && (
-        <p className="text-sm text-gray-600">Escribí un cultivo (en inglés funciona mejor) y apretá “Buscar”.</p>
-      )}
     </div>
   );
 }
