@@ -30,49 +30,53 @@ export default async function handler(req, res) {
       // Si Trefle falla, seguimos al fallback silenciosamente
     }
 
-    // 2) Fallback: Wikipedia REST (sin token)
-    // Lista inicial de cultivos comunes; si viene q, la usamos como filtro/título prioritario
-    const baseTitles = [
-      "Tomato", "Potato", "Onion", "Carrot", "Lettuce", "Spinach", "Broccoli", "Cabbage",
-      "Strawberry", "Blueberry", "Raspberry", "Apple", "Pear", "Peach", "Pumpkin",
-      "Zucchini", "Cucumber", "Garlic", "Ginger", "Pepper_(plant)", "Chili_pepper",
-      "Corn", "Wheat", "Rice", "Oat", "Barley"
-    ];
+    // 2) Fallback: Wikipedia REST (sin token) — con español, límite y sin duplicados
+const lang = (req.query.lang || "es").toString().toLowerCase(); // ej: es, en, pt
+const limit = Math.min(parseInt(req.query.limit || "20", 10) || 20, 40); // hasta 40
+const baseTitles = [
+  "Tomate", "Papa", "Cebolla", "Zanahoria", "Lechuga", "Espinaca", "Brócoli", "Repollo",
+  "Frutilla", "Arándano", "Frambuesa", "Manzana", "Pera", "Durazno", "Calabaza",
+  "Zucchini", "Pepino", "Ajo", "Jengibre", "Ají", "Maíz", "Trigo", "Arroz", "Avena", "Cebada"
+];
 
-    let titles = baseTitles;
-    if (query && query.length > 1) {
-      // intentamos anteponer el query como título directo
-      titles = [query, ...baseTitles];
-    }
-
-    // Traemos summaries en paralelo y normalizamos
-    const uniq = Array.from(new Set(titles)).slice(0, 25);
-    const results = await Promise.all(
-      uniq.map(async (t) => {
-        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t)}`;
-        const r = await fetch(url, { headers: { Accept: "application/json" } });
-        if (!r.ok) return null;
-        const w = await r.json();
-        // Filtrado simple: si no hay extract/título, descartamos
-        if (!w?.title) return null;
-        return {
-          id: w.title,
-          attributes: {
-            name: w.title,
-            binomial_name: "", // Wikipedia summary no siempre trae el nombre científico
-            description: w.extract || "",
-            main_image_url:
-              w.originalimage?.source ||
-              w.thumbnail?.source ||
-              "",
-          },
-        };
-      })
-    );
-
-    const data = results.filter(Boolean);
-    return res.status(200).json({ data });
-  } catch (err) {
-    return res.status(500).json({ error: "Proxy error", details: String(err?.message || err) });
-  }
+let titles = baseTitles;
+if (query && query.length > 1) {
+  titles = [query, ...baseTitles];
 }
+
+// Unicos + tope de resultados
+const uniq = Array.from(new Set(titles)).slice(0, limit);
+
+// Traemos summaries en paralelo del idioma elegido
+const results = await Promise.all(
+  uniq.map(async (t) => {
+    const url = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t)}`;
+    const r = await fetch(url, { headers: { Accept: "application/json" } });
+    if (!r.ok) return null;
+    const w = await r.json();
+    if (!w?.title || (!w?.extract && !w?.description)) return null;
+
+    return {
+      id: w.title,
+      attributes: {
+        name: w.title,
+        binomial_name: "", // Wikipedia summary no siempre trae nombre científico
+        description: w.extract || w.description || "",
+        main_image_url: w.originalimage?.source || w.thumbnail?.source || ""
+      }
+    };
+  })
+);
+
+// Quitar nulos y duplicados por título (por las dudas)
+const seen = new Set();
+const data = [];
+for (const item of results) {
+  if (!item) continue;
+  if (seen.has(item.id)) continue;
+  seen.add(item.id);
+  data.push(item);
+}
+
+return res.status(200).json({ data });
+
