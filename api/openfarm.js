@@ -1,7 +1,7 @@
 // api/openfarm.js
 
-// Fuerza runtime Node (no Edge)
-export const config = { runtime: "nodejs20.x" };
+// Fuerza runtime Node (no Edge). La versión exacta se define en Vercel Settings.
+export const config = { runtime: "nodejs" };
 
 const withTimeout = async (promise, ms = 10000, label = "timeout") => {
   const ctrl = new AbortController();
