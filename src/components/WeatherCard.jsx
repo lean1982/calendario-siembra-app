@@ -1,60 +1,77 @@
-import React from 'react'
+/**
+ * WeatherCard.jsx
+ * Reemplaza SOLO los íconos por versiones lineales verdes.
+ * No cambia el layout: título, temperatura, descripción y lista de próximos días.
+ */
+import React from "react";
+import WeatherIcon from "./WeatherIcon";
 
-const SunIcon = ({size=64}) => (
-  <svg className="icon-green" width={size} height={size} viewBox="0 0 64 64" fill="none" strokeWidth="3">
-    <circle cx="32" cy="32" r="12" stroke="#22d500"/>
-    {Array.from({length:8}).map((_,i)=>{
-      const a = (i*45)*Math.PI/180;
-      const x1 = 32 + Math.cos(a)*20, y1 = 32 + Math.sin(a)*20;
-      const x2 = 32 + Math.cos(a)*28, y2 = 32 + Math.sin(a)*28;
-      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#22d500" strokeLinecap="round"/>
-    })}
-  </svg>
-)
-
-const CloudIcon = ({size=64}) => (
-  <svg className="icon-green" width={size} height={size} viewBox="0 0 64 64" fill="none" strokeWidth="3">
-    <path d="M20 42h24a10 10 0 0 0 0-20 14 14 0 0 0-26-4A10 10 0 0 0 20 42z" stroke="#22d500" strokeLinejoin="round"/>
-  </svg>
-)
-
-const RainIcon = ({size=64}) => (
-  <svg className="icon-green" width={size} height={size} viewBox="0 0 64 64" fill="none" strokeWidth="3">
-    <path d="M20 34h24a10 10 0 0 0 0-20 14 14 0 0 0-26-4A10 10 0 0 0 20 34z" stroke="#22d500" strokeLinejoin="round"/>
-    <line x1="22" y1="42" x2="22" y2="54" stroke="#22d500" strokeLinecap="round"/>
-    <line x1="32" y1="42" x2="32" y2="56" stroke="#22d500" strokeLinecap="round"/>
-    <line x1="42" y1="42" x2="42" y2="54" stroke="#22d500" strokeLinecap="round"/>
-  </svg>
-)
-
-const Mini = ({type}) => {
-  const Comp = type==='rain'?RainIcon: type==='cloud'?CloudIcon: SunIcon
-  return <Comp size={24}/>
-}
-
-export default function WeatherCard({city='–', temp='–', description='–', icon='sun', week=[]}){
-  return (
-    <div className="card">
-      <div className="flex items-center gap-4">
-        <div>
-          <div className="text-xl font-semibold">{city}</div>
-          <div className="text-4xl font-bold text-[color:var(--brand)]">{typeof temp==='number'? Math.round(temp)+'°' : temp}</div>
-          <div className="muted capitalize">{description}</div>
-        </div>
-        <div className="ml-auto">
-          {icon==='rain'? <RainIcon/> : icon==='cloud'? <CloudIcon/> : <SunIcon/>}
-        </div>
+export default function WeatherCard({ city, current, forecast, loading, error }) {
+  if (loading) {
+    return (
+      <div className="border rounded p-3 shadow-sm">
+        <p className="text-sm text-gray-600">Cargando clima…</p>
       </div>
-      {week.length>0 && (
-        <div className="mt-4 grid grid-cols-7 gap-2 place-items-center">
-          {week.map((d,idx)=> (
-            <div key={idx} className="flex flex-col items-center text-sm">
-              <Mini type={d.icon}/>
-              <div className="muted">{d.label}</div>
-            </div>
-          ))}
+    );
+  }
+  if (error) {
+    return (
+      <div className="border rounded p-3 shadow-sm">
+        <p className="text-sm text-red-600">No pudimos obtener el clima.</p>
+      </div>
+    );
+  }
+  if (!current) return null;
+
+  const now = current;
+  const primary = now.weather && now.weather[0] ? now.weather[0] : null;
+  const temp = now.main ? Math.round(now.main.temp) : null;
+  const desc = primary ? (primary.description || primary.main) : "";
+
+  // Tomamos hasta 5 items del pronóstico (si existe)
+  const items = (forecast && forecast.list ? forecast.list : [])
+    .slice(0, 5)
+    .map((it) => ({
+      dt: it.dt,
+      temp: Math.round(it.main?.temp ?? it.temp?.day ?? 0),
+      w: it.weather ? it.weather[0] : null
+    }));
+
+  function formatHour(ts) {
+    try {
+      const d = new Date((ts || 0) * 1000);
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } catch {
+      return "";
+    }
+  }
+
+  return (
+    <div className="border rounded p-4 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-gray-500">Clima</p>
+          <h3 className="text-base font-semibold">{city || "Mi ubicación"}</h3>
         </div>
+        <WeatherIcon ow={primary} size={40} />
+      </div>
+
+      <div className="flex items-end gap-3 mb-2">
+        <span className="text-3xl font-bold">{temp != null ? `${temp}°C` : "--"}</span>
+        <span className="text-gray-600">{desc}</span>
+      </div>
+
+      {items.length > 0 && (
+        <ul className="mt-3 grid grid-cols-5 gap-2 text-center">
+          {items.map((it, idx) => (
+            <li key={idx} className="bg-gray-50 rounded p-2">
+              <WeatherIcon ow={it.w} size={22} className="mx-auto mb-1" />
+              <div className="text-xs text-gray-600">{formatHour(it.dt)}</div>
+              <div className="text-sm font-medium">{`${it.temp}°`}</div>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
-  )
+  );
 }
