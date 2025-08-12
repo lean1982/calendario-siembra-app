@@ -1,87 +1,75 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
-import WeatherCard from './components/WeatherCard.jsx'
-import CropCard from './components/CropCard.jsx'
+import WeatherCard from './components/WeatherCard'
+import CropCard from './components/CropCard'
 import data from './data/huerta.json'
 
-const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
-
-function capitalizar(str='') {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
-}
+const BRAND = '#22d500'
+const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
 export default function App(){
   const [mes, setMes] = useState('')
-  const [busqueda, setBusqueda] = useState('')
-  const [geo, setGeo] = useState(null)
+  const [ubicacion, setUbicacion] = useState('')
+  const [wx, setWx] = useState(null)
 
-  // Geolocalización al cargar (solo para clima)
-  useEffect(() => {
-    if (navigator?.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setGeo(pos.coords),
-        () => setGeo(null),
-        { enableHighAccuracy: true, timeout: 8000 }
-      )
-    }
-  }, [])
+  useEffect(()=>{
+    const now = new Date()
+    setMes(meses[now.getMonth()])
+  },[])
 
-  const cultivosFiltrados = useMemo(() => {
-    const m = mes.trim().toLowerCase()
-    const byMonth = (c) => !m || (Array.isArray(c.siembra) && c.siembra.some(mm => mm.toLowerCase() === capitalizar(m).toLowerCase()))
-    const byText = (c) => c.nombre.toLowerCase().includes(busqueda.trim().toLowerCase())
-    return data.filter(c => byMonth(c) && byText(c))
-  }, [mes, busqueda])
+  useEffect(()=>{
+    if(!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(async (pos)=>{
+      const { latitude, longitude } = pos.coords
+      try{
+        const apiKey = import.meta.env.VITE_OPENWEATHER_KEY
+        const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&units=metric&appid=${apiKey}&lang=es&exclude=minutely,hourly,alerts`
+        const r = await axios.get(url)
+        const cityRes = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&lang=es`)
+        const city = cityRes.data.name
+        const cur = r.data.current
+        const daily = r.data.daily.slice(0,7).map(d=>{
+          const dt = new Date(d.dt*1000)
+          const label = 'DLMMJVS'[dt.getDay()]
+          const main = d.weather?.[0]?.main?.toLowerCase() || ''
+          const icon = main.includes('rain') ? 'rain' : main.includes('cloud') ? 'cloud' : 'sun'
+          return { label, icon }
+        })
+        const main = r.data.current.weather?.[0]?.main?.toLowerCase() || ''
+        const icon = main.includes('rain') ? 'rain' : main.includes('cloud') ? 'cloud' : 'sun'
+        setWx({ city, temp: cur.temp, description: r.data.current.weather?.[0]?.description, icon, week: daily })
+        setUbicacion(city)
+      }catch(e){ console.error(e)}
+    })
+  },[])
 
-  const hoy = new Date()
-  const mesActual = MESES[hoy.getMonth()]
+  const cultivos = useMemo(()=>{
+    const m = mes?.toLowerCase()
+    return data.filter(c=> !m || (c.siembra || []).some(mm => mm.toLowerCase()===m))
+  },[mes])
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-3xl sm:text-4xl font-bold text-brand my-6">
-        Calendario de siembra y cosecha
-      </h1>
-      <p className="mb-4 text-neutral-700">
-        Consultá qué sembrar y cuándo cosechar según tu ubicación y época del año.
-      </p>
+    <div className="max-w-2xl mx-auto p-6">
+      <h1 className="h1">Calendario de siembra y cosecha</h1>
+      <p className="muted mt-2">Consultá qué sembrar y cuándo cosechar según tu ubicación y época del año.</p>
 
-      <div className="flex flex-col gap-3 max-w-lg">
-        <div>
-          <label className="block mb-1 text-neutral-800">Mes</label>
-          <input
-            type="text"
-            placeholder={capitalizar(mesActual)}
-            value={mes}
-            onChange={(e)=> setMes(e.target.value)}
-            className="border px-3 py-2 rounded w-full"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 text-neutral-800">Ubicación</label>
-          <input
-            type="text"
-            placeholder="Ciudad o barrio (opcional)"
-            className="border px-3 py-2 rounded w-full"
-            // es visual; el clima usa geolocalización
-            onChange={()=>{}}
-          />
-        </div>
-
-        <div className="mt-2 max-w-md">
-          <WeatherCard geo={geo} />
-        </div>
+      <div className="mt-6">
+        <label className="block mb-1 font-medium">Mes</label>
+        <input className="border rounded-xl px-3 py-2 w-full" placeholder="Mes" value={mes} onChange={e=>setMes(e.target.value)} />
       </div>
 
-      <h2 className="text-xl font-semibold mt-8 mb-2">Podés sembrar:</h2>
+      <div className="mt-4">
+        <label className="block mb-1 font-medium">Ubicación</label>
+        <input className="border rounded-xl px-3 py-2 w-full" placeholder="Ubicación" value={ubicacion} onChange={e=>setUbicacion(e.target.value)} />
+      </div>
 
+      <div className="mt-4">
+        <WeatherCard {...wx}/>
+      </div>
+
+      <h2 className="h2 mt-8 mb-2">Podés sembrar:</h2>
       <div>
-        {cultivosFiltrados.map(c => (
-          <CropCard key={c.nombre} cultivo={c} />
-        ))}
-        {!cultivosFiltrados.length && (
-          <p className="text-neutral-600">No encontramos cultivos para ese mes. Probá otra búsqueda.</p>
-        )}
+        {cultivos.map(c => <CropCard key={c.nombre} crop={c} />)}
       </div>
     </div>
   )

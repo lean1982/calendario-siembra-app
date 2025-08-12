@@ -6,9 +6,9 @@
       "Septiembre"
     ],
     "cosecha": "Noviembre",
-    "riego": "Mantener humedad constante, regar día por medio si no llueve",
-    "solSombra": "Sol con algo de sombra en verano",
-    "distancia": "30–40 cm"
+    "sol": "Sol",
+    "distancia": "30 cm",
+    "riego": "Humedad constante"
   },
   {
     "nombre": "Brócoli",
@@ -18,9 +18,9 @@
       "Agosto"
     ],
     "cosecha": "Octubre",
-    "riego": "Riego regular, 2-3 veces por semana",
-    "solSombra": "Sol",
-    "distancia": "45–60 cm"
+    "sol": "Sol",
+    "distancia": "40–50 cm",
+    "riego": "Regular"
   },
   {
     "nombre": "Repollo",
@@ -30,35 +30,8 @@
       "Agosto"
     ],
     "cosecha": "Octubre",
-    "riego": "Riego abundante semanal, según clima",
-    "solSombra": "Sol",
-    "distancia": "40–50 cm"
-  },
-  {
-    "nombre": "Lechuga",
-    "siembra": [
-      "Marzo",
-      "Abril",
-      "Mayo",
-      "Junio",
-      "Julio",
-      "Agosto"
-    ],
-    "cosecha": "60–75 días desde siembra",
-    "riego": "Ligero y frecuente; mantener suelo húmedo",
-    "solSombra": "Sol o media sombra",
-    "distancia": "25–30 cm"
-  },
-  {
-    "nombre": "Zanahoria",
-    "siembra": [
-      "Marzo",
-      "Abril",
-      "Mayo"
-    ],
-    "cosecha": "90–120 días desde siembra",
-    "riego": "Regular, sin encharcar",
-    "solSombra": "Sol",
-    "distancia": "5–8 cm"
+    "sol": "Sol",
+    "distancia": "40–50 cm",
+    "riego": "Abundante semanal"
   }
 ]
