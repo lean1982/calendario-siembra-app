@@ -1,0 +1,15 @@
+/* Tamaño y comportamiento por defecto del icono */
+img.icono {
+  display: block;
+  width: 28px; /* fallback si no hay Tailwind */
+  height: 28px;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+/* Tint exacto aproximado al #22d500 para SVGs negros */
+.svg-green {
+  filter: brightness(0) saturate(100%) invert(39%) sepia(88%) saturate(1062%) hue-rotate(67deg) brightness(101%) contrast(96%);
+}
