@@ -1,55 +1,45 @@
+import React from 'react'
+import { iconFor } from '../utils/iconMap'
 
-import React from 'react';
-import { iconFor } from '../utils/iconMap';
-import '../styles/icons.css';
-
-export default function CropCard({ item }){
-  const {
-    nombre,
-    siembra = [],
-    cosecha = '',
-    riego = '',
-    sol_sombra = '',
-    dias_cosecha = '',
-    como_cosechar = '',
-    distancia = ''
-  } = item;
+export default function CropCard({ cultivo }) {
+  const icon = iconFor(cultivo.nombre)
 
   return (
-    <div className="crop-card border-b border-neutral-100 pb-6 mb-6">
-      <img
-        src={iconFor(nombre)}
-        alt=""
-        aria-hidden="true"
-        className="crop-icon select-none"
-        loading="lazy"
-      />
-      <div className="flex-1">
-        <h3 className="crop-title text-2xl md:text-3xl mb-1">{nombre}</h3>
-        <div className="crop-meta text-sm md:text-base">
-          {siembra.length > 0 && (
-            <p><strong>Siembra:</strong> {siembra.join(', ')}</p>
-          )}
-          {cosecha && (
-            <p><strong>Cosecha estimada:</strong> {cosecha}</p>
-          )}
-          {dias_cosecha && (
-            <p><strong>Días hasta cosecha:</strong> {dias_cosecha}</p>
-          )}
-          {sol_sombra && (
-            <p><strong>Ubicación:</strong> {sol_sombra}</p>
-          )}
-          {distancia && (
-            <p><strong>Distancia entre plantas:</strong> {distancia}</p>
-          )}
-          {riego && (
-            <p><strong>Riego:</strong> {riego}</p>
-          )}
-          {como_cosechar && (
-            <p><strong>Cómo cosechar:</strong> {como_cosechar}</p>
-          )}
-        </div>
+    <div className="flex gap-4 py-6">
+      {/* Icono a la izquierda */}
+      <div className="shrink-0" style={{width: '90px'}}>
+        <span
+          className="mask-green"
+          style={{
+            width: '90px',
+            height: '90px',
+            WebkitMaskImage: `url(${icon})`,
+            maskImage: `url(${icon})`,
+          }}
+          aria-hidden
+        />
+      </div>
+
+      {/* Texto */}
+      <div className="flex-1 border-b border-neutral-200 pb-6">
+        <h3 className="text-2xl font-semibold text-brand mb-1">{cultivo.nombre}</h3>
+        <p className="text-neutral-600"><strong>Siembra:</strong> {cultivo.siembra?.join(', ') || '—'}</p>
+        {cultivo.cosecha && (
+          <p className="text-neutral-600"><strong>Cosecha estimada:</strong> {cultivo.cosecha}</p>
+        )}
+        {cultivo.diasCosecha && (
+          <p className="text-neutral-600"><strong>Días hasta cosecha:</strong> {cultivo.diasCosecha}</p>
+        )}
+        {cultivo.solSombra && (
+          <p className="text-neutral-600"><strong>Sol/sombra:</strong> {cultivo.solSombra}</p>
+        )}
+        {cultivo.distancia && (
+          <p className="text-neutral-600"><strong>Distancia entre plantas:</strong> {cultivo.distancia}</p>
+        )}
+        {cultivo.riego && (
+          <p className="text-neutral-600"><strong>Riego:</strong> {cultivo.riego}</p>
+        )}
       </div>
     </div>
-  );
+  )
 }

@@ -1,19 +1,42 @@
-// Mapeo de nombre (normalizado) -> archivo svg en /public/icons
-export const ICON_MAP = {
-  'frutilla': 'strawberry.svg',
-  'fresa': 'strawberry.svg',
-  'brocoli': 'broccoli.svg',
-  'brócoli': 'broccoli.svg',
-  'repollo': 'cabbage.svg',
+// Mapeo nombre -> archivo de icono (en /public/icons).
+// Si no hay match, se usa 'strawberry.svg' como fallback.
+const MAP = {
   'tomate': 'tomato.svg',
-  'zanahoria': 'carrot.svg',
+  'brócoli': 'broccoli.svg',
+  'brocoli': 'broccoli.svg',
+  'repollo': 'cabbage.svg',
   'lechuga': 'lettuce.svg',
+  'zanahoria': 'carrot.svg',
   'cebolla': 'onion.svg',
   'papa': 'potato.svg',
+  'pepino': 'cucumber.svg',
+  'zapallo': 'pumpkin.svg',
+  'zapallito': 'zucchini.svg',
+  'frutilla': 'strawberry.svg',
+  'ajo': 'garlic.svg',
+  'apio': 'celery.svg',
+  'berenjena': 'eggplant.svg',
+  'rúcula': 'arugula.svg',
+  'rucula': 'arugula.svg',
+  'perejil': 'parsley.svg',
+  'pimiento': 'pepper.svg',
+  'morrón': 'pepper.svg',
+  'morron': 'pepper.svg',
+  'rábano': 'radish.svg',
+  'rabano': 'radish.svg',
+  'espinaca': 'spinach.svg',
+  'acelga': 'chard.svg',
+  'habas': 'broadbean.svg',
+  'haba': 'broadbean.svg',
+  'arveja': 'pea.svg',
+  'maíz': 'corn.svg',
+  'maiz': 'corn.svg',
+  'calabacín': 'zucchini.svg',
+  'calabacin': 'zucchini.svg'
 };
-export const DEFAULT_ICON = 'strawberry.svg';
 
-export function pickIcon(name) {
-  const key = (name || '').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
-  return ICON_MAP[key] || DEFAULT_ICON;
+export function iconFor(name) {
+  if (!name) return '/icons/strawberry.svg'
+  const key = name.trim().toLowerCase()
+  return '/icons/' + (MAP[key] || 'strawberry.svg')
 }
