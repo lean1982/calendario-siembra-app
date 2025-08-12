@@ -2,10 +2,69 @@
   {
     "name": "Tomate",
     "slug": "tomato",
-    "months": ["Agosto","Septiembre","Octubre"],
+    "months": [
+      "Agosto",
+      "Septiembre",
+      "Octubre"
+    ],
     "sun": "sol",
     "harvest_after_days": 90,
-    "harvest_tips": "Cosechar cuando el fruto esté firme y rojo; cortar con tijera dejando cabito.",
+    "harvest_tips": "Cosechar cuando esté rojo firme; cortar con tijera con cabito.",
     "spacing_cm": 50
+  },
+  {
+    "name": "Lechuga",
+    "slug": "lettuce",
+    "months": [
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Agosto",
+      "Septiembre"
+    ],
+    "sun": "sol o media sombra",
+    "harvest_after_days": 45,
+    "harvest_tips": "Cortar hojas externas o cosecha entera al cerrar el cogollo.",
+    "spacing_cm": 30
+  },
+  {
+    "name": "Zanahoria",
+    "slug": "carrot",
+    "months": [
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Septiembre",
+      "Octubre"
+    ],
+    "sun": "sol",
+    "harvest_after_days": 80,
+    "harvest_tips": "Aflojar tierra y tirar del follaje con cuidado.",
+    "spacing_cm": 8
+  },
+  {
+    "name": "Cebolla",
+    "slug": "onion",
+    "months": [
+      "Mayo",
+      "Junio",
+      "Julio"
+    ],
+    "sun": "sol",
+    "harvest_after_days": 120,
+    "harvest_tips": "Cosechar cuando el follaje acame y el bulbo esté formado.",
+    "spacing_cm": 12
+  },
+  {
+    "name": "Frutilla",
+    "slug": "strawberry",
+    "months": [
+      "Agosto",
+      "Septiembre"
+    ],
+    "sun": "sol",
+    "harvest_after_days": 120,
+    "harvest_tips": "Cortar el fruto con cabito cuando esté rojo brillante.",
+    "spacing_cm": 40
   }
 ]
