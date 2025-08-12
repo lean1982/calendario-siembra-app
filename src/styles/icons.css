@@ -1,15 +1,28 @@
-/* Tamaño y comportamiento por defecto del icono */
-img.icono {
-  display: block;
-  width: 28px; /* fallback si no hay Tailwind */
-  height: 28px;
-  object-fit: contain;
-  user-select: none;
-  -webkit-user-drag: none;
-  pointer-events: none;
-}
 
-/* Tint exacto aproximado al #22d500 para SVGs negros */
-.svg-green {
-  filter: brightness(0) saturate(100%) invert(39%) sepia(88%) saturate(1062%) hue-rotate(67deg) brightness(101%) contrast(96%);
+/* icons.css — NO cambia tu layout. Sólo pinta y dimensiona el ícono. */
+.icon{
+  --icon-size: 28px;
+  --icon-color: #22d500;
+  display:inline-block;
+  width:var(--icon-size);
+  height:var(--icon-size);
+  background: var(--icon-color);
+  -webkit-mask-repeat:no-repeat;
+  mask-repeat:no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  vertical-align: text-bottom;
 }
+@media (min-width: 768px){
+  .icon{ --icon-size: 32px; }
+}
+/* Fallback a frutilla si no matchea */
+.icon{ -webkit-mask-image: url('/icons/strawberry.svg'); mask-image: url('/icons/strawberry.svg'); }
+/* Mapeos: agrega tantos como íconos tengas en /public/icons */
+.icon[data-name="tomato"]     { -webkit-mask-image: url('/icons/tomato.svg');     mask-image: url('/icons/tomato.svg'); }
+.icon[data-name="lettuce"]    { -webkit-mask-image: url('/icons/lettuce.svg');    mask-image: url('/icons/lettuce.svg'); }
+.icon[data-name="carrot"]     { -webkit-mask-image: url('/icons/carrot.svg');     mask-image: url('/icons/carrot.svg'); }
+.icon[data-name="onion"]      { -webkit-mask-image: url('/icons/onion.svg');      mask-image: url('/icons/onion.svg'); }
+.icon[data-name="strawberry"] { -webkit-mask-image: url('/icons/strawberry.svg'); mask-image: url('/icons/strawberry.svg'); }

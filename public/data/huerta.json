@@ -9,7 +9,7 @@
     ],
     "sun": "sol",
     "harvest_after_days": 90,
-    "harvest_tips": "Cosechar cuando esté rojo firme; cortar con tijera con cabito.",
+    "harvest_tips": "Cosechar rojo firme, con tijera.",
     "spacing_cm": 50
   },
   {
@@ -24,7 +24,7 @@
     ],
     "sun": "sol o media sombra",
     "harvest_after_days": 45,
-    "harvest_tips": "Cortar hojas externas o cosecha entera al cerrar el cogollo.",
+    "harvest_tips": "Cortar hojas externas o planta entera.",
     "spacing_cm": 30
   },
   {
@@ -39,7 +39,7 @@
     ],
     "sun": "sol",
     "harvest_after_days": 80,
-    "harvest_tips": "Aflojar tierra y tirar del follaje con cuidado.",
+    "harvest_tips": "Aflojar tierra y tirar del follaje.",
     "spacing_cm": 8
   },
   {
@@ -52,7 +52,7 @@
     ],
     "sun": "sol",
     "harvest_after_days": 120,
-    "harvest_tips": "Cosechar cuando el follaje acame y el bulbo esté formado.",
+    "harvest_tips": "Cosechar cuando acame el follaje.",
     "spacing_cm": 12
   },
   {
@@ -64,7 +64,7 @@
     ],
     "sun": "sol",
     "harvest_after_days": 120,
-    "harvest_tips": "Cortar el fruto con cabito cuando esté rojo brillante.",
+    "harvest_tips": "Cortar con cabito.",
     "spacing_cm": 40
   }
 ]
