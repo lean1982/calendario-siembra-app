@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 
-// Paleta y helpers (sin tocar estilos existentes)
 const VERDE = "#22d500";
 const MESES = [
   "Enero","Febrero","Marzo","Abril","Mayo","Junio",
@@ -9,18 +8,20 @@ const MESES = [
 ];
 const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
 
-// Intenta cargar ícono SVG si existe en /public/icons
+// Ícono SVG desde /public/icons (verde aplicado vía CSS filter)
 function CropIcon({ icon, nombre }) {
-  const src = icon ? `/icons/${icon}` : "/icons/strawberry.svg";
-  // Si no existiera el archivo, el onError evita romper el layout
   const [ok, setOk] = useState(true);
+  const src = ok && icon ? `/icons/${icon}` : "/icons/strawberry.svg"; // fallback por si falta el archivo
   return (
     <img
-      src={ok ? src : "/icons/strawberry.svg"}
+      src={src}
       onError={() => setOk(false)}
       alt={nombre}
       className="w-16 h-16 md:w-20 md:h-20"
-      style={{ filter: `brightness(0) saturate(100%) invert(44%) sepia(90%) saturate(5717%) hue-rotate(77deg) brightness(99%) contrast(105%)` }}
+      style={{
+        filter:
+          "brightness(0) saturate(100%) invert(44%) sepia(90%) saturate(5717%) hue-rotate(77deg) brightness(99%) contrast(105%)"
+      }}
     />
   );
 }
@@ -33,7 +34,6 @@ export default function App() {
   const [loadingData, setLoadingData] = useState(true);
   const [errorData, setErrorData] = useState("");
 
-  // Cargar datos desde /public/data/huerta.json
   useEffect(() => {
     let vivo = true;
     (async () => {
@@ -53,7 +53,6 @@ export default function App() {
     return () => { vivo = false; };
   }, []);
 
-  // Clima (OpenWeather)
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -69,19 +68,14 @@ export default function App() {
     });
   }, []);
 
-  // Mes actual por defecto para el placeholder
-  const mesActual = useMemo(() => {
-    const idx = new Date().getMonth();
-    return MESES[idx];
-  }, []);
-
-  // Filtrado por mes y búsqueda
+  const mesActual = useMemo(() => MESES[new Date().getMonth()], []);
   const cultivosFiltrados = useMemo(() => {
     const mesElegido = mes ? cap(mes) : "";
     return cultivos.filter((c) => {
       const coincideMes =
         !mesElegido ||
-        (Array.isArray(c.mesesSiembra) && (c.mesesSiembra.includes(mesElegido) || c.mesesSiembra.includes("Todo el año")));
+        (Array.isArray(c.mesesSiembra) &&
+          (c.mesesSiembra.includes(mesElegido) || c.mesesSiembra.includes("Todo el año")));
       const coincideNombre = c.nombre?.toLowerCase().includes(busqueda.toLowerCase());
       return coincideMes && coincideNombre;
     });
@@ -142,25 +136,24 @@ export default function App() {
               {c.nombre}
             </h3>
 
-            <p>🌱 <strong>Siembra:</strong> {Array.isArray(c.mesesSiembra) ? c.mesesSiembra.join(", ") : c.mesesSiembra}</p>
+            <p><strong>Siembra:</strong> {Array.isArray(c.mesesSiembra) ? c.mesesSiembra.join(", ") : c.mesesSiembra}</p>
             {c.mesesCosecha && (
-              <p>🌾 <strong>Cosecha estimada:</strong> {Array.isArray(c.mesesCosecha) ? c.mesesCosecha.join(", ") : c.mesesCosecha}</p>
+              <p><strong>Cosecha estimada:</strong> {Array.isArray(c.mesesCosecha) ? c.mesesCosecha.join(", ") : c.mesesCosecha}</p>
             )}
             {c.diasACosecha && (
-              <p>⏱️ <strong>Días a cosecha:</strong> {Array.isArray(c.diasACosecha) ? `${c.diasACosecha[0]}–${c.diasACosecha[1]} días` : `${c.diasACosecha} días`}</p>
+              <p><strong>Días a cosecha:</strong> {Array.isArray(c.diasACosecha) ? `${c.diasACosecha[0]}–${c.diasACosecha[1]} días` : `${c.diasACosecha} días`}</p>
             )}
-            <p>☀️ <strong>Sol/Sombra:</strong> {c.toleraSombra ? "Tolera sombra" : "Pleno sol"}</p>
-            {c.ubicacion && <p>📍 <strong>Ubicación:</strong> {c.ubicacion}</p>}
+            <p><strong>Sol/Sombra:</strong> {c.toleraSombra ? "Tolera sombra" : "Pleno sol"}</p>
             {(c.distanciaPlantasCm || c.distanciaLineasCm) && (
               <p>
-                📏 <strong>Distancias:</strong>{" "}
+                <strong>Distancias:</strong>{" "}
                 {c.distanciaPlantasCm ? `Plantas ${c.distanciaPlantasCm[0]}–${c.distanciaPlantasCm[1]} cm` : ""}
                 {c.distanciaPlantasCm && c.distanciaLineasCm ? " · " : ""}
                 {c.distanciaLineasCm ? `Líneas ${c.distanciaLineasCm[0]}–${c.distanciaLineasCm[1]} cm` : ""}
               </p>
             )}
-            {c.comoCosechar && <p>🧺 <strong>Cómo cosechar:</strong> {c.comoCosechar}</p>}
-            {c.recomendacionCosecha && <p>✅ <strong>Recomendación:</strong> {c.recomendacionCosecha}</p>}
+            {c.comoCosechar && <p><strong>Cómo cosechar:</strong> {c.comoCosechar}</p>}
+            {c.recomendacionCosecha && <p><strong>Recomendación:</strong> {c.recomendacionCosecha}</p>}
           </div>
         </div>
       ))}
