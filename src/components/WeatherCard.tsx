@@ -5,7 +5,7 @@ type Weather = {
   name: string;
   tempC: number;
   description: string;
-  icon: string;       // openweather icon code
+  icon: string;
   daily: { dt: number; icon: string }[];
 };
 
@@ -28,34 +28,52 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
       setLoading(true);
       setError(null);
       try {
-        // 1) Geocoding
-        const g = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(locationInput)}&limit=1&appid=${API_KEY}`)
-          .then(r => r.json());
-        if (!g?.length) throw new Error('No se encontró la ubicación');
+        const g = await fetch(
+          `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(locationInput)}&limit=1&appid=${API_KEY}`
+        ).then(r => r.json());
+        if (!Array.isArray(g) || g.length === 0) throw new Error('No se encontró la ubicación');
         const { lat, lon, name, country, state } = g[0];
         const display = [name, state, country].filter(Boolean).join(', ');
         onResolvedLocation?.(display);
 
-        // 2) Onecall for current + daily
-        const w = await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`)
-          .then(r => r.json());
+        // Actual
+        const current = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`
+        ).then(r => r.json());
+        if (!current?.main) throw new Error('No se pudo leer el clima actual');
+        const tempC = Math.round(current.main.temp);
+        const curIcon = current.weather?.[0]?.icon ?? '01d';
+        const curDesc = current.weather?.[0]?.description ?? '';
 
-        const now = w.current;
-        const daily = (w.daily || []).slice(0, 7).map((d: any) => ({
-          dt: d.dt,
-          icon: d.weather?.[0]?.icon || '01d'
-        }));
+        // Pronóstico 5 días / 3h
+        const forecast = await fetch(
+          `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`
+        ).then(r => r.json());
+
+        const byDay: Record<string, { dt: number; icon: string }> = {};
+        if (forecast?.list) {
+          for (const item of forecast.list) {
+            const d = new Date(item.dt * 1000);
+            const key = d.toISOString().slice(0,10);
+            const hourDist = Math.abs(d.getHours() - 12);
+            const prev = byDay[key];
+            if (!prev || hourDist < Math.abs(new Date(prev.dt*1000).getHours() - 12)) {
+              byDay[key] = { dt: item.dt, icon: item.weather?.[0]?.icon ?? '01d' };
+            }
+          }
+        }
+        const daily = Object.values(byDay).slice(0, 7);
 
         setData({
           name: display,
-          tempC: Math.round(now.temp),
-          description: now.weather?.[0]?.description ?? '',
-          icon: now.weather?.[0]?.icon ?? '01d',
+          tempC,
+          description: curDesc,
+          icon: curIcon,
           daily
         });
       } catch (e: any) {
         console.error(e);
-        setError(e.message || 'Error de clima');
+        setError(e?.message || 'Error de clima');
       } finally {
         setLoading(false);
       }
