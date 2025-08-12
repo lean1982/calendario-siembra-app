@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Tipografía base agradable en móviles */
-html, body, #root { height: 100%; }
-body { @apply bg-white text-gray-900; }
+.icon-green {
+  filter: invert(47%) sepia(91%) saturate(545%) hue-rotate(64deg) brightness(97%) contrast(102%);
+}
