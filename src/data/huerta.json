@@ -1,0 +1,61 @@
+[
+  {
+    "nombre": "Tomate",
+    "siembra": [
+      "Agosto",
+      "Septiembre",
+      "Octubre"
+    ],
+    "sol": "Sol pleno",
+    "diasCosecha": 90,
+    "cosecha": "Cortar racimos cuando estén rojos firmes.",
+    "distancia": "40–50 cm"
+  },
+  {
+    "nombre": "Brócoli",
+    "siembra": [
+      "Marzo",
+      "Abril",
+      "Agosto"
+    ],
+    "sol": "Sol / Media sombra",
+    "diasCosecha": 70,
+    "cosecha": "Cortar la cabeza central antes de que abran flores.",
+    "distancia": "40–50 cm"
+  },
+  {
+    "nombre": "Repollo",
+    "siembra": [
+      "Febrero",
+      "Marzo",
+      "Agosto"
+    ],
+    "sol": "Sol",
+    "diasCosecha": 80,
+    "cosecha": "Cortar la cabeza compacta a ras de suelo.",
+    "distancia": "40–60 cm"
+  },
+  {
+    "nombre": "Zanahoria",
+    "siembra": [
+      "Marzo",
+      "Abril",
+      "Septiembre",
+      "Octubre"
+    ],
+    "sol": "Sol",
+    "diasCosecha": 70,
+    "cosecha": "Aflojar el suelo y tirar del follaje con cuidado.",
+    "distancia": "5–8 cm"
+  },
+  {
+    "nombre": "Lechuga",
+    "siembra": [
+      "Todo el año"
+    ],
+    "sol": "Sol / Media sombra",
+    "diasCosecha": 45,
+    "cosecha": "Cortar hojas externas o la planta completa.",
+    "distancia": "25–30 cm"
+  }
+]

@@ -1,5 +1,35 @@
-.icon-green {
-  filter: invert(47%) sepia(91%) saturate(545%) hue-rotate(64deg) brightness(97%) contrast(102%);
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tipografías del sistema para verse como la maqueta */
+:root { --brand: #22d500; }
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  color: #1f2937;
+  background: #fff;
 }
 
+h1 { color: var(--brand); }
 
+/* Tarjeta de clima */
+.card {
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* Ícono por máscara para colorear SVG negro en verde */
+.crop-icon {
+  width: 72px;
+  height: 72px;
+  display: inline-block;
+  background-color: var(--brand);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
