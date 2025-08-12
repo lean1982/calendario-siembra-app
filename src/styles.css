@@ -110,3 +110,24 @@ label { display: block; font-weight: 600; margin: 16px 0 8px; }
 }
 small.muted { color: var(--muted); }
 .green { color: var(--green); }
+
+
+/* OpenWeather icons recolored to app green using mask-image */
+.ow {
+  display: inline-block;
+  background-color: var(--green);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  width: 28px;
+  height: 28px;
+  /* Masks let us color monochrome regardless of original PNG colors */
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+.ow-lg { width: 72px; height: 72px; }
+.ow-sm { width: 28px; height: 28px; }

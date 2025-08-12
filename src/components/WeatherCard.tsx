@@ -93,12 +93,14 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
         <div><small className="muted" style={{textTransform:'capitalize'}}>{data.description}</small></div>
       </div>
       <div style={{display:'flex', alignItems:'center', gap:8}}>
-        <img className="weather-icon" src={`https://openweathermap.org/img/wn/${data.icon}@2x.png`} alt="" />
+        {(() => { const url = `https://openweathermap.org/img/wn/${data.icon}@2x.png`; return (
+          <span className="ow ow-lg" style={{ WebkitMaskImage: `url(${url})`, maskImage: `url(${url})` }} />
+        ); })()}
       </div>
       <div style={{gridColumn:'1 / -1', display:'flex', gap:10, alignItems:'center'}}>
-        {data.daily.map(d => (
-          <img key={d.dt} width="28" height="28" src={`https://openweathermap.org/img/wn/${d.icon}.png`} alt="" />
-        ))}
+        {data.daily.map(d => { const url = `https://openweathermap.org/img/wn/${d.icon}.png`; return (
+          <span key={d.dt} className="ow ow-sm" style={{ WebkitMaskImage: `url(${url})`, maskImage: `url(${url})` }} />
+        ); })}
       </div>
     </div>
   );
