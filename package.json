@@ -8,8 +8,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "node node_modules/vite/bin/vite.js build",
+    "preview": "vite preview",
+    "prepare": "chmod +x node_modules/.bin/vite || true"
   },
   "dependencies": {
     "react": "^18.2.0",
