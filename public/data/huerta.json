@@ -1,70 +1,29 @@
 [
   {
-    "name": "Tomate",
-    "slug": "tomato",
-    "months": [
-      "Agosto",
-      "Septiembre",
-      "Octubre"
-    ],
-    "sun": "sol",
-    "harvest_after_days": 90,
-    "harvest_tips": "Cosechar rojo firme, con tijera.",
-    "spacing_cm": 50
-  },
-  {
-    "name": "Lechuga",
-    "slug": "lettuce",
-    "months": [
-      "Marzo",
-      "Abril",
-      "Mayo",
+    "nombre": "Frutilla",
+    "siembra": [
       "Agosto",
       "Septiembre"
     ],
-    "sun": "sol o media sombra",
-    "harvest_after_days": 45,
-    "harvest_tips": "Cortar hojas externas o planta entera.",
-    "spacing_cm": 30
+    "cosecha": "Noviembre",
+    "sol_sombra": "Pleno sol",
+    "dias_cosecha": "90–120 días",
+    "como_cosechar": "Cortar el pedúnculo sin aplastar el fruto",
+    "distancia": "30–40 cm",
+    "riego": "Mantener humedad constante, sin encharcar"
   },
   {
-    "name": "Zanahoria",
-    "slug": "carrot",
-    "months": [
+    "nombre": "Brócoli",
+    "siembra": [
       "Marzo",
       "Abril",
-      "Mayo",
-      "Septiembre",
-      "Octubre"
+      "Agosto"
     ],
-    "sun": "sol",
-    "harvest_after_days": 80,
-    "harvest_tips": "Aflojar tierra y tirar del follaje.",
-    "spacing_cm": 8
-  },
-  {
-    "name": "Cebolla",
-    "slug": "onion",
-    "months": [
-      "Mayo",
-      "Junio",
-      "Julio"
-    ],
-    "sun": "sol",
-    "harvest_after_days": 120,
-    "harvest_tips": "Cosechar cuando acame el follaje.",
-    "spacing_cm": 12
-  },
-  {
-    "name": "Frutilla",
-    "slug": "strawberry",
-    "months": [
-      "Agosto",
-      "Septiembre"
-    ],
-    "sun": "sol",
-    "harvest_after_days": 120,
-    "harvest_tips": "Cortar con cabito.",
-    "spacing_cm": 40
+    "cosecha": "Octubre",
+    "sol_sombra": "Sol",
+    "dias_cosecha": "80–100 días",
+    "como_cosechar": "Cortar la cabeza central antes de que floree",
+    "distancia": "45–60 cm",
+    "riego": "Regular, 2–3 veces por semana"
   }
 ]
