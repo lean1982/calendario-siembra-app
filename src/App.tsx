@@ -1,11 +1,19 @@
 import React, { useMemo, useState } from 'react';
 import { MONTHS_ES, currentMonthIndex } from './utils/months';
-import { crops as cropsData, type Crop } from './data/crops';
+import * as CropsModule from './data/crops';
 import CropCard from './components/CropCard';
 import WeatherCard from './components/WeatherCard';
 import LocationAutocomplete from './components/LocationAutocomplete';
 import MobileControlsBar from './components/MobileControlsBar';
 import EmptyState from './components/EmptyState';
+
+// Tolerante a cualquier forma de export en src/data/crops.ts
+const cropsData: any[] = (CropsModule as any).crops
+  ?? (CropsModule as any).default
+  ?? (CropsModule as any).CROPS
+  ?? (CropsModule as any).data
+  ?? (CropsModule as any).list
+  ?? [];
 
 type Mode = 'siembra' | 'cosecha';
 
@@ -20,9 +28,9 @@ export default function App() {
 
   const results = useMemo(() => {
     const term = query.trim().toLowerCase();
-    return (cropsData as Crop[]).filter(c => {
-      const byMonth = mode === 'siembra' ? c.siembra.includes(month) : c.cosecha.includes(month);
-      const byName  = !term || c.nombre.toLowerCase().includes(term);
+    return (cropsData as any[]).filter((c: any) => {
+      const byMonth = mode === 'siembra' ? c.siembra?.includes?.(month) : c.cosecha?.includes?.(month);
+      const byName  = !term || String(c.nombre || '').toLowerCase().includes(term);
       return byMonth && byName;
     });
   }, [month, mode, query]);
@@ -91,7 +99,7 @@ export default function App() {
       {results.length === 0 ? (
         <EmptyState month={month} mode={mode} onPickMonth={setMonth} />
       ) : (
-        results.map(crop => <CropCard key={crop.nombre} crop={crop} />)
+        results.map((crop: any, i: number) => <CropCard key={crop.nombre ?? i} crop={crop} />)
       )}
 
       {/* Barra mobile fija */}
