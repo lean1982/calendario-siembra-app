@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { MONTHS_ES, currentMonthIndex } from './utils/months';
-import cropsData from './data/crops';
-import type { Crop } from './data/crops';
+import { crops as cropsData, type Crop } from './data/crops';
 import CropCard from './components/CropCard';
 import WeatherCard from './components/WeatherCard';
 import LocationAutocomplete from './components/LocationAutocomplete';
@@ -16,7 +15,7 @@ export default function App() {
   const [locationInput, setLocationInput] = useState('');
   const [resolvedLocation, setResolvedLocation] = useState<string>('');
 
-  // Buscador por cultivo (opcional, queda como estaba)
+  // Buscador por cultivo
   const [query, setQuery] = useState('');
 
   const results = useMemo(() => {
@@ -45,7 +44,7 @@ export default function App() {
         Consultá qué sembrar y cuándo cosechar según tu ubicación y época del año.
       </p>
 
-      {/* Controles de escritorio (mantienen tu diseño actual) */}
+      {/* Controles de escritorio */}
       <label>Mes</label>
       <input
         className="input"
