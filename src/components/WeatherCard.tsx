@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import WeatherIcon from './WeatherIcon';
+import { WeatherSkeleton } from './Skeletons';
 
 type Weather = {
   name: string;
@@ -79,8 +80,9 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
   }, [locationInput]);
 
   if (!locationInput) return null;
+  if (loading) return <WeatherSkeleton />;
   if (error) return <div className="weather-card"><small className="muted">Clima: {error}</small></div>;
-  if (loading || !data) return <div className="weather-card"><small className="muted">Cargando clima…</small></div>;
+  if (!data) return null;
 
   return (
     <div className="weather-card">
