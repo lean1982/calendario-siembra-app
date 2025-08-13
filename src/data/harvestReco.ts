@@ -1,5 +1,6 @@
 // src/data/harvestReco.ts
-// Mapa desde el PDF: columna "RECOMENDACIÓN DE COSECHA".
+// Extraído del PDF "Planificador ProHuerta": columna RECOMENDACIÓN DE COSECHA.
+// Sirve como fallback si el JSON no trae el texto (o viene mal mapeado).
 
 function toKey(s: string) {
   return (s || '')
@@ -12,7 +13,7 @@ function toKey(s: string) {
 
 const RECO: Record<string, string> = {
   acelga: 'Hoja por hoja.',
-  ajo: 'Arrancá entero cuando el follaje amarillea.',
+  ajo: 'Arrancar entero cuando el follaje amarillea.',
   albahaca: 'Cosechar tallos con hojas.',
   apio: 'Hoja por hoja o planta entera.',
   arveja: 'Vaina con grano tierno.',
@@ -20,13 +21,13 @@ const RECO: Record<string, string> = {
   berenjena: 'Fruto antes de que se endurezca la semilla.',
   'brocoli-y-coliflor': 'Cortar cabezas florales cuando abren los primeros capullos.',
   'cebolla-y-cebolla-de-verdeo': 'Arrancar plantas enteras cuando amarillean.',
-  'chaucha-enana-y-de-rama': 'Vainas tiernas, grano chico y tierno.',
-  choclo: 'Con barbas secas marrón oscuro y grano lechoso.',
+  'chaucha-enana-y-de-rama': 'Vainas tiernas con grano chico y tierno.',
+  choclo: 'Barbas secas marrón oscuro; grano lechoso.',
   esparrago: 'Cortar tallos tiernos.',
   espinaca: 'Cortar plantas enteras o con raíz.',
   frutilla: 'Frutos maduros.',
   haba: 'Vaina tierna con grano tierno y grande.',
-  hinojo: 'Planta entera (sin raíz), con cabeza formada.',
+  hinojo: 'Planta entera sin raíz, con cabeza formada.',
   'lechuga-y-escarola': 'Planta entera antes de la floración.',
   'melon-y-sandia': 'Fruto maduro, cabito seco.',
   papa: 'Desenterrar cuando se seca la planta.',
@@ -35,12 +36,12 @@ const RECO: Record<string, string> = {
   pimiento: 'Fruto en el punto de madurez deseado.',
   puerro: 'Planta entera con raíz, antes de florecer.',
   rabanito: 'Raíz tierna, antes de que se ahueque.',
-  radicheta: 'Hojas tiernas al ras del suelo. Cortes frecuentes.',
+  radicheta: 'Hojas tiernas al ras del suelo; cortes frecuentes.',
   remolacha: 'Raíz formada antes de la floración.',
   repollo: 'Cabezas de hojas duras y apretadas.',
   rucula: 'Hojas tiernas a 5 cm. Hacer atados.',
   tomate: 'Fruto en el punto de madurez deseado.',
-  zanahoria: 'Raíz formada antes de “irse en vicio”.',
+  zanahoria: 'Raíz formada antes de irse en vicio.',
   'zapallo-y-cayote': 'Fruto maduro, cabito seco.',
   'zapallito-y-zuccini': 'Fruto tierno tamaño medio; semillas tiernas.',
 };

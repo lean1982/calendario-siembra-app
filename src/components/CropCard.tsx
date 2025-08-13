@@ -1,6 +1,7 @@
 import React from 'react';
 import { MONTHS_ES } from '../utils/months';
 import type { Crop } from '../data/crops';
+import { getHarvestReco } from '../data/harvestReco';
 
 type Props = { crop: Crop };
 
@@ -20,17 +21,53 @@ function formatDias(val: any): string {
   return s;
 }
 
+function normalize(s: any) {
+  return String(s ?? '').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+}
+
 function pick(crop: any) {
-  const distancia = crop.distancia ?? crop['DISTANCIA ENTRE PLANTAS (CENTÍMETROS)'] ?? crop.espacio ?? crop.separacion ?? '';
-  const sombraRaw = crop.sombra ?? crop.luz ?? crop.sol_sombra ?? crop.exposicion ?? crop['TOLERA SOMBRA'];
+  const distancia =
+    crop.distancia ??
+    crop['DISTANCIA ENTRE PLANTAS (CENTÍMETROS)'] ??
+    crop.espacio ??
+    crop.separacion ??
+    '';
+
+  const sombraRaw =
+    crop.sombra ?? crop.luz ?? crop.sol_sombra ?? crop.exposicion ?? crop['TOLERA SOMBRA'];
   const sombra = typeof sombraRaw === 'boolean' ? (sombraRaw ? 'Sí' : 'No') : String(sombraRaw ?? '').trim();
-  const diasRaw = crop.dias ?? crop.dias_cosecha ?? crop.diasParaCosecha ?? crop.dias_a_cosecha ?? crop['DÍAS A COSECHA'] ?? crop['Días a cosecha'];
+
+  const diasRaw =
+    crop.dias ??
+    crop.dias_cosecha ??
+    crop.diasParaCosecha ??
+    crop.dias_a_cosecha ??
+    crop['DÍAS A COSECHA'] ??
+    crop['Días a cosecha'];
   const dias = formatDias(diasRaw);
-  return { distancia, sombra, dias };
+
+  const candidates = [
+    crop.recomendacion_cosecha,
+    crop['Recomendación de cosecha'],
+    crop.cosecha_recomendada,
+    crop.cosecha_metodo,
+    crop.cosechaMetodo,
+    crop.cosecha_texto,
+    crop.cosechaInfo,
+    crop.como_cosechar,
+  ];
+  let reco = String((candidates.find(Boolean) ?? '')).trim();
+  const n = normalize(reco);
+  if (!reco || /^\d+$/.test(reco) || n === 'siembracosecha') reco = '';
+
+  return { distancia, sombra, dias, reco };
 }
 
 export default function CropCard({ crop }: Props) {
-  const { distancia, sombra, dias } = pick(crop);
+  const { distancia, sombra, dias, reco } = pick(crop);
+  // Fallback seguro desde el PDF si el JSON no trae el texto
+  const recoFinal = reco || getHarvestReco((crop as any).slug || crop.nombre);
+
   const iconName = (crop as any).icon || (crop as any).nombre_en || crop.nombre;
   const iconSrc = `/icons/${String(iconName).toLowerCase().replaceAll(' ', '-')}.svg`;
 
@@ -60,7 +97,10 @@ export default function CropCard({ crop }: Props) {
           {sombra && <span className="badge">Sombra: {sombra}</span>}
         </div>
 
-        {/* Eliminado: mini-calendar/timeline y cualquier texto adicional */}
+        {/* Recomendación de cosecha (restaurada) */}
+        {recoFinal && <p><small className="muted">Recomendación de cosecha:</small> {recoFinal}</p>}
+
+        {/* Mini calendario / timeline: ELIMINADO */}
       </div>
     </article>
   );
