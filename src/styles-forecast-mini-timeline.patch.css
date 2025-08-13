@@ -1,0 +1,31 @@
+
+/* Forecast strip with day initials */
+.forecast {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 4px;
+}
+.forecast-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.forecast-day { color: var(--muted); }
+
+/* Mini month grid for mobile */
+.mini-calendar { display: grid; gap: 6px; margin-top: 10px; }
+.mini-row {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0,1fr));
+  gap: 4px;
+}
+.mini-box { height: 8px; border-radius: 4px; background: #eee; }
+.mini-box.on { background: var(--green); }
+.mini-box.current { outline: 2px solid var(--green); outline-offset: 2px; }
+
+/* Responsive */
+@media (max-width: 719px) {
+  .timeline { display: none; }
+  .mini-calendar { display: grid; }
+}
+@media (min-width: 720px) {
+  .mini-calendar { display: none; }
+}

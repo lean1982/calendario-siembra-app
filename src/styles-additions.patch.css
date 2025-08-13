@@ -1,0 +1,4 @@
+/* spacing tweaks for chips and sections */
+.chips { margin-top: 16px; gap: 12px; }
+.section { margin-top: 20px; }
+.section + .section { margin-top: 28px; }

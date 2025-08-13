@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import WeatherGlyph from './WeatherGlyph';
 
@@ -15,6 +16,11 @@ type Props = {
 };
 
 const API_KEY = import.meta.env.VITE_OPENWEATHER_KEY as string;
+
+function dayLetterES(date: Date) {
+  const letters = ['D','L','M','M','J','V','S'] as const;
+  return letters[date.getDay()];
+}
 
 export default function WeatherCard({ locationInput, onResolvedLocation }: Props) {
   const [data, setData] = useState<Weather | null>(null);
@@ -56,13 +62,13 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
             const hourDist = Math.abs(d.getHours() - 12);
             const prev = byDay[key] as any;
             if (!prev || hourDist < Math.abs(new Date(prev.dt*1000).getHours() - 12)) {
-              byDay[key] = { dt: item.dt, icon: item.weather?.[0]?.icon ?? '01d' };
+              (byDay as any)[key] = { dt: item.dt, icon: item.weather?.[0]?.icon ?? '01d' };
             }
           }
         }
-        const daily = Object.values(byDay as Record<string, {dt:number, icon:string}>).slice(0, 7);
+        const days = Object.values(byDay as Record<string, {dt:number, icon:string}>).slice(0, 5);
 
-        setData({ name: display, tempC, description: curDesc, icon: curIcon, daily });
+        setData({ name: display, tempC, description: curDesc, icon: curIcon, daily: days });
       } catch (e: any) {
         console.error(e);
         setError(e?.message || 'Error de clima');
@@ -84,11 +90,21 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
         <div className="weather-temp">{data.tempC}°</div>
         <div><small className="muted" style={{textTransform:'capitalize'}}>{data.description}</small></div>
       </div>
-      <div style={{display:'flex', alignItems:'center', gap:8}}>
+      <div style={{display:'flex', alignItems:'center', gap:8}} aria-hidden="true">
         <WeatherGlyph code={data.icon} size={72} />
       </div>
-      <div style={{gridColumn:'1 / -1', display:'flex', gap:10, alignItems:'center'}}>
-        {data.daily.map((d) => <WeatherGlyph key={d.dt} code={d.icon} size={24} />)}
+
+      <div className="forecast">
+        {data.daily.map((d) => {
+          const dt = new Date(d.dt * 1000);
+          const lab = dayLetterES(dt);
+          return (
+            <div className="forecast-item" key={d.dt}>
+              <WeatherGlyph code={d.icon} size={24} />
+              <small className="forecast-day">{lab}</small>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
