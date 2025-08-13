@@ -37,7 +37,7 @@ export default function App() {
     localStorage.setItem('huerta_prefs', JSON.stringify(data));
   }, [monthIdx, query, mode, locationInput]);
 
-  // Keyboard shortcut: Ctrl/Cmd+K focuses search (se mantiene, solo ocultamos el hint visual)
+  // Keyboard shortcut: Ctrl/Cmd+K focuses search (se mantiene, sin hint visual)
   const searchRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -64,6 +64,8 @@ export default function App() {
   const cosechaHoy = useMemo(() => filterByMonth(filtered, monthIdx, 'cosecha'), [filtered, monthIdx]);
 
   const monthLabel = MONTHS_ES[monthIdx];
+  const showSiembra = mode !== 'cosecha';
+  const showCosecha = mode !== 'siembra';
 
   return (
     <div className="container">
@@ -133,10 +135,8 @@ export default function App() {
         >Cosecha</button>
       </div>
 
-      <div style={{height:12}} />
-
-      {mode !== 'cosecha' && (
-        <>
+      {showSiembra && (
+        <section className="section">
           <p className="section-lede">
             En <span className="green">{monthLabel}</span> en {resolvedLocation} podés sembrar:
           </p>
@@ -145,12 +145,12 @@ export default function App() {
           ) : (
             siembraHoy.map(c => <CropCard key={c.id} crop={c} highlight="siembra" />)
           )}
-        </>
+        </section>
       )}
 
-      {mode !== 'siembra' && (
-        <>
-          <p className="section-lede" style={{marginTop:32}}>
+      {showCosecha && (
+        <section className="section">
+          <p className="section-lede">
             En <span className="green">{monthLabel}</span> en {resolvedLocation} podés cosechar:
           </p>
           {cosechaHoy.length === 0 ? (
@@ -158,7 +158,7 @@ export default function App() {
           ) : (
             cosechaHoy.map(c => <CropCard key={c.id} crop={c} highlight="cosecha" />)
           )}
-        </>
+        </section>
       )}
 
       {/* Sticky bar (solo mobile) */}

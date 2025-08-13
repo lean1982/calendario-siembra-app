@@ -1,5 +1,5 @@
-
 import { useEffect, useState } from 'react';
+import WeatherGlyph from './WeatherGlyph';
 
 type Weather = {
   name: string;
@@ -15,17 +15,6 @@ type Props = {
 };
 
 const API_KEY = import.meta.env.VITE_OPENWEATHER_KEY as string;
-
-function IconLayered({ code, large=false }: { code: string; large?: boolean }) {
-  const baseUrl = large ? `https://openweathermap.org/img/wn/${code}@2x.png` : `https://openweathermap.org/img/wn/${code}.png`;
-  const wrapClass = large ? 'ow-wrap ow-lg' : 'ow-wrap ow-sm';
-  return (
-    <span className={wrapClass}>
-      <span className="ow-base" style={{ WebkitMaskImage: `url(${baseUrl})`, maskImage: `url(${baseUrl})` }} />
-      <span className="ow-fill" style={{ WebkitMaskImage: `url(${baseUrl})`, maskImage: `url(${baseUrl})` }} />
-    </span>
-  );
-}
 
 export default function WeatherCard({ locationInput, onResolvedLocation }: Props) {
   const [data, setData] = useState<Weather | null>(null);
@@ -59,19 +48,19 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
           `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`
         ).then(r => r.json());
 
-        const byDay: Record<string, { dt: number; icon: string }> = {};
+        const byDay = {};
         if (forecast?.list) {
           for (const item of forecast.list) {
             const d = new Date(item.dt * 1000);
             const key = d.toISOString().slice(0,10);
             const hourDist = Math.abs(d.getHours() - 12);
-            const prev = byDay[key];
+            const prev = byDay[key] as any;
             if (!prev || hourDist < Math.abs(new Date(prev.dt*1000).getHours() - 12)) {
               byDay[key] = { dt: item.dt, icon: item.weather?.[0]?.icon ?? '01d' };
             }
           }
         }
-        const daily = Object.values(byDay).slice(0, 7);
+        const daily = Object.values(byDay as Record<string, {dt:number, icon:string}>).slice(0, 7);
 
         setData({ name: display, tempC, description: curDesc, icon: curIcon, daily });
       } catch (e: any) {
@@ -96,10 +85,10 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
         <div><small className="muted" style={{textTransform:'capitalize'}}>{data.description}</small></div>
       </div>
       <div style={{display:'flex', alignItems:'center', gap:8}}>
-        <IconLayered code={data.icon} large />
+        <WeatherGlyph code={data.icon} size={72} />
       </div>
       <div style={{gridColumn:'1 / -1', display:'flex', gap:10, alignItems:'center'}}>
-        {data.daily.map(d => <IconLayered key={d.dt} code={d.icon} />)}
+        {data.daily.map((d) => <WeatherGlyph key={d.dt} code={d.icon} size={24} />)}
       </div>
     </div>
   );

@@ -1,11 +1,8 @@
 :root {
   --green: #29CC15;
-  --text: #222;
-  --muted: #8A8A8A;
+  --text: #1F1F1F;
+  --muted: #6A6A6A;
   --radius: 18px;
-
-  /* Ajustá esto para cambiar el grosor del borde verde en los iconos del clima:
-     más chico => borde más grueso | más grande => borde más fino */
   --ow-fill-scale: 0.90;
 }
 
@@ -21,7 +18,7 @@ body {
 .container {
   max-width: 920px;
   margin: 0 auto;
-  padding: 32px 20px 80px;
+  padding: 32px 20px 100px; /* extra bottom for stickybar */
 }
 
 h1 {
@@ -33,7 +30,7 @@ h1 {
 
 .subtitle {
   margin: 0 0 24px;
-  color: #666;
+  color: #595959;
   max-width: 34ch;
 }
 
@@ -48,6 +45,16 @@ label { display: block; font-weight: 600; margin: 16px 0 8px; }
   background: #fff;
 }
 .input:focus { border-color: var(--green); box-shadow: 0 0 0 3px #29cc1520; }
+
+.kbd {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
+  font-size: 12px;
+  color: #555;
+  margin-left: 6px;
+}
 
 .grid {
   display: grid;
@@ -69,24 +76,27 @@ label { display: block; font-weight: 600; margin: 16px 0 8px; }
   color: var(--green);
   margin: 10px 0 0;
 }
-/* ya no usamos .weather-icon, pero lo dejamos por compatibilidad */
 .weather-icon { width: 72px; height: 72px; color: var(--green); }
 
 .section-title { margin: 24px 0 8px; font-size: 18px; }
-.section-lede { margin: 0 0 16px; color: #666; }
+.section-lede { margin: 0 0 16px; color: #595959; }
 
 .result {
   display: grid;
   grid-template-columns: 64px 1fr;
   gap: 16px;
   margin: 16px 0 24px;
+  transition: transform .12s ease, box-shadow .12s ease;
 }
+.result:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.06); }
 .result h3 {
   margin: 0 0 6px;
   color: var(--green);
   font-size: 26px;
 }
-.result p { margin: 0 0 4px; color: #777; }
+.result p { margin: 0 0 4px; color: #444; }
+small.muted { color: var(--muted); }
+.green { color: var(--green); }
 
 .badge {
   display: inline-flex;
@@ -96,12 +106,26 @@ label { display: block; font-weight: 600; margin: 16px 0 8px; }
   border: 1px solid #e5e5e5;
   border-radius: 999px;
   font-size: 12px;
-  color: #555;
+  color: #444;
 }
 
 .row { display: flex; gap: 8px; flex-wrap: wrap; }
-small.muted { color: var(--muted); }
-.green { color: var(--green); }
+
+/* Chips */
+.chips { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.chip {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #dcdcdc;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+.chip:hover { background: #f8f8f8; }
+.chip.active {
+  border-color: #b8e9b2;
+  background: #eaffea;
+}
 
 /* Autocomplete */
 .autocomplete-root { position: relative; }
@@ -144,7 +168,6 @@ small.muted { color: var(--muted); }
   color: #666;
 }
 .clear-btn:hover { background: #f5f5f5; }
-
 .geo-btn {
   padding: 8px 12px;
   border-radius: 999px;
@@ -155,11 +178,10 @@ small.muted { color: var(--muted); }
 }
 .geo-btn:hover { background: #f5f5f5; }
 
-/* ===== Layered weather icons: green outline + white fill ===== */
-.ow-wrap { position: relative; display: inline-block; }
+/* Layered weather icons: green outline + white fill */
+.ow-wrap { position: relative; display:inline-block; }
 .ow-lg { width: 72px; height: 72px; }
 .ow-sm { width: 28px; height: 28px; }
-
 .ow-base, .ow-fill {
   position: absolute; inset: 0;
   background-repeat: no-repeat;
@@ -175,3 +197,39 @@ small.muted { color: var(--muted); }
 }
 .ow-base { background-color: var(--green); }
 .ow-fill { background-color: #fff; transform: scale(var(--ow-fill-scale)); }
+
+/* Timeline (12 meses): top=siembra, bottom=cosecha */
+.timeline { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin-top: 10px; }
+.timeline .cell {
+  height: 12px; background: #efefef; border-radius: 4px; position: relative; overflow: hidden;
+}
+.timeline .cell.s::before {
+  content: ''; position: absolute; left:0; right:0; top:0; height: 50%;
+  background: rgba(41,204,21,0.35);
+}
+.timeline .cell.c::after {
+  content: ''; position: absolute; left:0; right:0; bottom:0; height: 50%;
+  background: rgba(41,204,21,1);
+}
+.timeline .cell.hl { box-shadow: 0 0 0 2px #29cc1540 inset; }
+
+/* Sticky bar (mobile only) */
+.stickybar {
+  position: fixed; z-index: 30; left: 0; right: 0; bottom: 0;
+  display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 8px;
+  background: #fff; padding: 10px 12px;
+  border-top: 1px solid #eaeaea; box-shadow: 0 -8px 18px rgba(0,0,0,.06);
+}
+.stickybar select, .stickybar input {
+  padding: 10px 12px;
+  border: 1.5px solid #d9d9d9;
+  border-radius: 12px;
+  font-size: 14px;
+}
+@media (min-width: 720px) { .stickybar { display: none; } }
+
+/* spacing tweaks for chips and sections */
+.chips { margin-top: 16px; gap: 12px; }
+.section { margin-top: 20px; }
+.section + .section { margin-top: 28px; }
+
