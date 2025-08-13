@@ -1,14 +1,13 @@
 import React from 'react';
 import { MONTHS_ES, currentMonthIndex } from '../utils/months';
 import type { Crop } from '../data/crops';
+import { getHarvestReco } from '../data/harvestReco';
 
 type Props = { crop: Crop; highlight?: 'siembra' | 'cosecha' };
 
-/** normaliza texto para checks */
 const normalize = (s: any) =>
   String(s ?? '').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
 
-/** “A–B días” o “X días” aunque vengan números pegados (120150) */
 function formatDias(val: any): string {
   if (val == null) return '';
   if (Array.isArray(val)) {
@@ -25,7 +24,6 @@ function formatDias(val: any): string {
   return s;
 }
 
-/** toma campos posibles del JSON (incluye encabezados tal cual del PDF) */
 function pick(crop: any) {
   const distancia =
     crop.distancia ??
@@ -35,14 +33,8 @@ function pick(crop: any) {
     '';
 
   const sombraRaw =
-    crop.sombra ??
-    crop.luz ??
-    crop.sol_sombra ??
-    crop.exposicion ??
-    crop['TOLERA SOMBRA'];
-
-  const sombra =
-    typeof sombraRaw === 'boolean' ? (sombraRaw ? 'Sí' : 'No') : String(sombraRaw ?? '').trim();
+    crop.sombra ?? crop.luz ?? crop.sol_sombra ?? crop.exposicion ?? crop['TOLERA SOMBRA'];
+  const sombra = typeof sombraRaw === 'boolean' ? (sombraRaw ? 'Sí' : 'No') : String(sombraRaw ?? '').trim();
 
   const diasRaw =
     crop.dias ??
@@ -51,10 +43,8 @@ function pick(crop: any) {
     crop.dias_a_cosecha ??
     crop['DÍAS A COSECHA'] ??
     crop['Días a cosecha'];
-
   const dias = formatDias(diasRaw);
 
-  // SOLO texto de recomendación (nunca el array de meses). Se filtra basura tipo “SiembraCosecha”.
   const candidates = [
     crop.recomendacion_cosecha,
     crop['Recomendación de cosecha'],
@@ -73,16 +63,15 @@ function pick(crop: any) {
 }
 
 function MonthBox({ active, current }: { active: boolean; current: boolean }) {
-  return (
-    <div
-      className={['mini-box', active ? 'on' : 'off', current ? 'current' : ''].filter(Boolean).join(' ')}
-    />
-  );
+  return <div className={['mini-box', active ? 'on' : 'off', current ? 'current' : ''].filter(Boolean).join(' ')} />;
 }
 
 export default function CropCard({ crop }: Props) {
   const now = currentMonthIndex();
   const { distancia, sombra, dias, reco } = pick(crop);
+
+  // Fallback seguro desde el PDF (si el JSON no trae texto)
+  const recoFinal = reco || getHarvestReco(crop.nombre);
 
   const iconName = (crop as any).icon || (crop as any).nombre_en || crop.nombre;
   const iconSrc = `/icons/${String(iconName).toLowerCase().replaceAll(' ', '-')}.svg`;
@@ -110,7 +99,7 @@ export default function CropCard({ crop }: Props) {
           {sombra && <span className="badge">Sombra: {sombra}</span>}
         </div>
 
-        {reco && <p><small className="muted">Recomendación de cosecha:</small> {reco}</p>}
+        {recoFinal && <p><small className="muted">Recomendación de cosecha:</small> {recoFinal}</p>}
 
         <div className="mini-calendar" role="img" aria-label="Meses de siembra (fila 1) y cosecha (fila 2)">
           <div className="mini-row">
