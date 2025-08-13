@@ -1,0 +1,26 @@
+
+
+/* Autocomplete */
+.autocomplete-root { position: relative; }
+.autocomplete {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0; right: 0;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 20;
+}
+.autocomp-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 0;
+  background: #fff;
+  cursor: pointer;
+}
+.autocomp-item:hover { background: #f5f5f5; }
+.autocomp-item.muted { color: #777; cursor: default; }

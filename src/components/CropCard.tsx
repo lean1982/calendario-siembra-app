@@ -22,8 +22,8 @@ export default function CropCard({ crop }: Props) {
           <span className="badge">Distancia entre plantas: {crop.spacing_cm} cm</span>
           <span className="badge">Sombra: {crop.sombra}</span>
         </div>
-        {crop.semillas_como && (
-          <p><small className="muted"><strong>Semillas:</strong> {crop.semillas_como}</small></p>
+        {crop.cosecha_recomendacion && (
+          <p><small className="muted"><strong>Cosecha:</strong> {crop.cosecha_recomendacion}</small></p>
         )}
       </div>
     </div>

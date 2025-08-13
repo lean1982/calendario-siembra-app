@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import WeatherCard from './components/WeatherCard';
 import CropCard from './components/CropCard';
+import LocationAutocomplete from './components/LocationAutocomplete';
 import { CROPS, type Crop } from './data/crops';
 import { MONTHS_ES, currentMonthIndex } from './utils/months';
 
@@ -50,13 +51,11 @@ export default function App() {
         ))}
       </select>
 
-      <label htmlFor="ubicacion">Ubicación</label>
-      <input
-        id="ubicacion"
-        className="input"
-        placeholder="Ciudad, Provincia, País"
+      <label>Ubicación</label>
+      <LocationAutocomplete
         value={locationInput}
-        onChange={(e) => setLocationInput(e.target.value)}
+        onChange={setLocationInput}
+        onSelect={setLocationInput}
       />
 
       <div style={{height:16}} />
