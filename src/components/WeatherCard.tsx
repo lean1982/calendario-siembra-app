@@ -1,6 +1,5 @@
-
 import { useEffect, useState } from 'react';
-import WeatherGlyph from './WeatherGlyph';
+import WeatherIcon from './WeatherIcon';
 
 type Weather = {
   name: string;
@@ -91,7 +90,7 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
         <div><small className="muted" style={{textTransform:'capitalize'}}>{data.description}</small></div>
       </div>
       <div style={{display:'flex', alignItems:'center', gap:8}} aria-hidden="true">
-        <WeatherGlyph code={data.icon} size={72} />
+        <WeatherIcon code={data.icon} size={72} />
       </div>
 
       <div className="forecast">
@@ -100,7 +99,7 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
           const lab = dayLetterES(dt);
           return (
             <div className="forecast-item" key={d.dt}>
-              <WeatherGlyph code={d.icon} size={24} />
+              <WeatherIcon code={d.icon} size={24} />
               <small className="forecast-day">{lab}</small>
             </div>
           );
