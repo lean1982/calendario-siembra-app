@@ -1,9 +1,12 @@
-
 :root {
   --green: #29CC15;
   --text: #222;
   --muted: #8A8A8A;
   --radius: 18px;
+
+  /* Ajustá esto para cambiar el grosor del borde verde en los iconos del clima:
+     más chico => borde más grueso | más grande => borde más fino */
+  --ow-fill-scale: 0.90;
 }
 
 * { box-sizing: border-box; }
@@ -42,6 +45,7 @@ label { display: block; font-weight: 600; margin: 16px 0 8px; }
   border-radius: 14px;
   font-size: 16px;
   outline: none;
+  background: #fff;
 }
 .input:focus { border-color: var(--green); box-shadow: 0 0 0 3px #29cc1520; }
 
@@ -65,19 +69,11 @@ label { display: block; font-weight: 600; margin: 16px 0 8px; }
   color: var(--green);
   margin: 10px 0 0;
 }
-.weather-icon {
-  width: 72px; height: 72px;
-  color: var(--green);
-}
+/* ya no usamos .weather-icon, pero lo dejamos por compatibilidad */
+.weather-icon { width: 72px; height: 72px; color: var(--green); }
 
-.section-title {
-  margin: 24px 0 8px;
-  font-size: 18px;
-}
-.section-lede {
-  margin: 0 0 16px;
-  color: #666;
-}
+.section-title { margin: 24px 0 8px; font-size: 18px; }
+.section-lede { margin: 0 0 16px; color: #666; }
 
 .result {
   display: grid;
@@ -103,34 +99,9 @@ label { display: block; font-weight: 600; margin: 16px 0 8px; }
   color: #555;
 }
 
-.row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
 small.muted { color: var(--muted); }
 .green { color: var(--green); }
-
-
-/* OpenWeather icons recolored to app green using mask-image */
-.ow {
-  display: inline-block;
-  background-color: var(--green);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  width: 28px;
-  height: 28px;
-  /* Masks let us color monochrome regardless of original PNG colors */
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  -webkit-mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  mask-size: contain;
-}
-.ow-lg { width: 72px; height: 72px; }
-.ow-sm { width: 28px; height: 28px; }
 
 /* Autocomplete */
 .autocomplete-root { position: relative; }
@@ -157,3 +128,50 @@ small.muted { color: var(--muted); }
 .autocomp-item:hover { background: #f5f5f5; }
 .autocomp-item.muted { color: #777; cursor: default; }
 
+/* Input adornments */
+.input-with-actions { position: relative; }
+.clear-btn {
+  position: absolute;
+  right: 8px; top: 50%;
+  transform: translateY(-50%);
+  width: 28px; height: 28px;
+  border-radius: 999px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  cursor: pointer;
+  line-height: 26px;
+  font-size: 16px;
+  color: #666;
+}
+.clear-btn:hover { background: #f5f5f5; }
+
+.geo-btn {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+.geo-btn:hover { background: #f5f5f5; }
+
+/* ===== Layered weather icons: green outline + white fill ===== */
+.ow-wrap { position: relative; display: inline-block; }
+.ow-lg { width: 72px; height: 72px; }
+.ow-sm { width: 28px; height: 28px; }
+
+.ow-base, .ow-fill {
+  position: absolute; inset: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  pointer-events: none;
+}
+.ow-base { background-color: var(--green); }
+.ow-fill { background-color: #fff; transform: scale(var(--ow-fill-scale)); }

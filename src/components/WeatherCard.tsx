@@ -16,6 +16,17 @@ type Props = {
 
 const API_KEY = import.meta.env.VITE_OPENWEATHER_KEY as string;
 
+function IconLayered({ code, large=false }: { code: string; large?: boolean }) {
+  const baseUrl = large ? `https://openweathermap.org/img/wn/${code}@2x.png` : `https://openweathermap.org/img/wn/${code}.png`;
+  const wrapClass = large ? 'ow-wrap ow-lg' : 'ow-wrap ow-sm';
+  return (
+    <span className={wrapClass}>
+      <span className="ow-base" style={{ WebkitMaskImage: `url(${baseUrl})`, maskImage: `url(${baseUrl})` }} />
+      <span className="ow-fill" style={{ WebkitMaskImage: `url(${baseUrl})`, maskImage: `url(${baseUrl})` }} />
+    </span>
+  );
+}
+
 export default function WeatherCard({ locationInput, onResolvedLocation }: Props) {
   const [data, setData] = useState<Weather | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +47,6 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
         const display = [name, state, country].filter(Boolean).join(', ');
         onResolvedLocation?.(display);
 
-        // Actual
         const current = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`
         ).then(r => r.json());
@@ -45,7 +55,6 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
         const curIcon = current.weather?.[0]?.icon ?? '01d';
         const curDesc = current.weather?.[0]?.description ?? '';
 
-        // Pronóstico 5 días / 3h
         const forecast = await fetch(
           `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`
         ).then(r => r.json());
@@ -64,13 +73,7 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
         }
         const daily = Object.values(byDay).slice(0, 7);
 
-        setData({
-          name: display,
-          tempC,
-          description: curDesc,
-          icon: curIcon,
-          daily
-        });
+        setData({ name: display, tempC, description: curDesc, icon: curIcon, daily });
       } catch (e: any) {
         console.error(e);
         setError(e?.message || 'Error de clima');
@@ -93,14 +96,10 @@ export default function WeatherCard({ locationInput, onResolvedLocation }: Props
         <div><small className="muted" style={{textTransform:'capitalize'}}>{data.description}</small></div>
       </div>
       <div style={{display:'flex', alignItems:'center', gap:8}}>
-        {(() => { const url = `https://openweathermap.org/img/wn/${data.icon}@2x.png`; return (
-          <span className="ow ow-lg" style={{ WebkitMaskImage: `url(${url})`, maskImage: `url(${url})` }} />
-        ); })()}
+        <IconLayered code={data.icon} large />
       </div>
       <div style={{gridColumn:'1 / -1', display:'flex', gap:10, alignItems:'center'}}>
-        {data.daily.map(d => { const url = `https://openweathermap.org/img/wn/${d.icon}.png`; return (
-          <span key={d.dt} className="ow ow-sm" style={{ WebkitMaskImage: `url(${url})`, maskImage: `url(${url})` }} />
-        ); })}
+        {data.daily.map(d => <IconLayered key={d.dt} code={d.icon} />)}
       </div>
     </div>
   );
